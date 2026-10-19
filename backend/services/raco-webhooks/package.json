@@ -1,0 +1,21 @@
+{
+  "name": "raco-webhooks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated Raco outbound webhooks for standalone product integrations (not SaaS)",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc --project tsconfig.build.json",
+    "start": "node dist/src/main.js",
+    "test": "jest --config jest.config.ts --passWithNoTests",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "express": "^4.21.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,38 @@
+{
+  "name": "raco-webhooks",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "backend/services/raco-webhooks/src",
+  "projectType": "application",
+  "tags": ["raco", "webhooks", "standalone"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "options": {
+        "cwd": "backend/services/raco-webhooks",
+        "commands": ["pnpm build"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "backend/services/raco-webhooks",
+        "command": "pnpm test"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "backend/services/raco-webhooks",
+        "command": "pnpm dev"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "backend/services/raco-webhooks",
+        "command": "pnpm typecheck"
+      }
+    }
+  }
+}

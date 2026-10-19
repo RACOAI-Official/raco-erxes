@@ -1,0 +1,38 @@
+{
+  "name": "raco-llm-gateway",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "backend/services/raco-llm-gateway/src",
+  "projectType": "application",
+  "tags": ["raco", "llm", "mock"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "options": {
+        "cwd": "backend/services/raco-llm-gateway",
+        "commands": ["pnpm build"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "backend/services/raco-llm-gateway",
+        "command": "pnpm test"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "backend/services/raco-llm-gateway",
+        "command": "pnpm dev"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "backend/services/raco-llm-gateway",
+        "command": "pnpm typecheck"
+      }
+    }
+  }
+}

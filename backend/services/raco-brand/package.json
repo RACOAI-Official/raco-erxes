@@ -1,0 +1,16 @@
+{
+  "name": "raco-brand",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Central Raco AI brand configuration (placeholders only; not a commercial rebrand grant)",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "test": "jest --config jest.config.ts --passWithNoTests",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "license": "AGPL-3.0-only",
+  "dependencies": {},
+  "devDependencies": {}
+}

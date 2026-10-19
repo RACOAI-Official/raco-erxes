@@ -1,10 +1,11 @@
 # PROJECT_STATUS — Raco AI × erxes
 
 **Updated:** 2026-10-19  
-**Product shape:** **Standalone / self-hosted** (SaaS explicitly out of scope)  
-**Phase:** Stage One baseline + webhooks scaffold on writable fork  
+**Product shape:** **Standalone branded deployment of erxes** (not a rebuilt CRM; SaaS out of scope)  
+**Phase:** Baseline + webhooks + branding audit; real Raco LLM blocked on API docs/creds  
 **Commercial launch gate:** **NOT APPROVED**  
-**Fork:** `https://github.com/razin0900/https-github.com-razin0900-erxes`
+**Fork:** `https://github.com/razin0900/https-github.com-razin0900-erxes`  
+**Gap tracker:** [GAP_VS_MASTER_PROMPT.md](./GAP_VS_MASTER_PROMPT.md)
 
 ---
 

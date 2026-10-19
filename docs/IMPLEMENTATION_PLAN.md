@@ -13,11 +13,12 @@
 | 1 Acquire / inventory | Official baseline | **In progress on fork** | `docs/*`, pin 3.3.2 |
 | 2 Licence gate | Rights clarity | **Gate open / NOT APPROVED** | `LICENCE_REVIEW.md`, `COMMERCIAL_LAUNCH_GATE.md` |
 | 3 Target architecture | Standalone overlay | **Updated** | `TARGET_ARCHITECTURE.md`, `DECISIONS.md` |
-| 4 White-labelling | Central brand config | **Scaffolded** | `raco-brand`, `BRANDING_GUIDE.md` |
+| 4 White-labelling | Central brand + OrgWhiteLabel | **Scaffold + surface audit** | `raco-brand`, `BRANDING_GUIDE.md` — apply disabled until assets/G5 |
 | 5 Multi-tenant SaaS | — | **OUT OF SCOPE** | Do not implement |
 | 6 Plans / billing / usage | — | **OUT OF SCOPE** | Do not implement |
-| 7 LLM Gateway | Optional mock only | Mock scaffold (lower priority) | `raco-llm-gateway` |
-| **Webhooks** | Connect to other products | **In progress** | Prefer upstream automations; `raco-webhooks` for signed outbound bus; `WEBHOOKS.md` |
+| 7 Raco LLM primary | Server-side gateway | **MOCK only** — real adapter blocked | Need Raco LLM docs + key (`LLM_GATEWAY.md`) |
+| **Webhooks** | Connect to other products | **Scaffolded** | Prefer automations; `raco-webhooks`; `WEBHOOKS.md` |
+| Preserve erxes features | No CRM rebuild | **Policy** | Use upstream modules as-is |
 | 8 Voice / Bangla | Verified APIs only | Not started | Block without contracts |
 | 9 Onboarding | Operator UX for standalone | Not started | Config + light plugins |
 | 10 Security / privacy | Evidence-based | Not started | Reviews + tests |

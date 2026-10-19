@@ -143,53 +143,40 @@ pnpm dev:uis
 
 Access the application at `http://localhost:3001`
 
-### Raco AI fork — local run (standalone / self-hosted)
+### Raco AI fork — run on **your laptop** (standalone / self-hosted)
 
 Writable fork: `https://github.com/razin0900/https-github.com-razin0900-erxes`  
 Product shape: **standalone** (not multi-tenant SaaS). Licence gate remains **NOT APPROVED** for commercial claims — see `docs/COMMERCIAL_LAUNCH_GATE.md`.
 
+**Cloud agent `localhost` ≠ your laptop.** To open the app in your browser, clone and start the stack on the machine where you browse. Full laptop guide (Windows-friendly): **[`docs/LAPTOP_LOCAL_RUN.md`](./docs/LAPTOP_LOCAL_RUN.md)**.
+
 ```bash
 git clone https://github.com/razin0900/https-github.com-razin0900-erxes.git
 cd https-github.com-razin0900-erxes
-# Prefer the Stage One PR branch when contributing:
-# git checkout cursor/raco-stage-one-baseline-73a1
+git checkout main
+
+# Mongo + Redis must already be on 27017 / 6379 (Docker Desktop example in LAPTOP_LOCAL_RUN.md)
 
 pnpm install
+cp .env.sample .env   # first time only — edit MONGO_URL, REDIS_HOST, REDIS_PORT, REACT_APP_API_URL
+# Leave ENABLED_PLUGINS unset for core-only. Never set ENABLED_PLUGINS= (empty).
 
-# Only if .env is missing — configure, never commit:
-test -f .env || cp .env.sample .env
-# Required keys (typical local values):
-#   MONGO_URL=mongodb://localhost:27017/erxes
-#   REDIS_HOST=localhost
-#   REDIS_PORT=6379
-#   REACT_APP_API_URL=http://localhost:4000
-# Do NOT set ENABLED_PLUGINS= (empty) — an empty value still waits on a blank plugin.
-# Leave ENABLED_PLUGINS unset for core-only, or set real names and run `pnpm dev:apis`.
-
-# Terminal 1 — Gateway + Core API
+# Terminal 1
 pnpm dev:core-api
 
-# Terminal 2 — Core UI (+ remotes when plugins are enabled)
+# Terminal 2
 pnpm dev:uis
-
-# Optional — all plugin APIs instead of / in addition when ENABLED_PLUGINS is set
-# pnpm dev:apis
-
-# Optional — Raco outbound webhooks sidecar (see docs/WEBHOOKS.md)
-# cd backend/services/raco-webhooks && pnpm exec tsx src/main.ts
-#   RACO_WEBHOOKS_ENABLED=true
-#   RACO_WEBHOOK_SIGNING_SECRET=<from secret manager>
-#   RACO_WEBHOOK_ENDPOINTS_JSON='[...]'
 ```
 
-| Service | URL / port | Notes |
-|---------|------------|-------|
-| Core UI | http://localhost:3001 | `pnpm dev:uis` |
-| API Gateway (GraphQL) | http://localhost:4000/graphql | from `pnpm dev:core-api` |
-| Core API | http://localhost:3300/health | from `pnpm dev:core-api` |
-| Raco webhooks (optional) | http://localhost:3391/health | `backend/services/raco-webhooks` |
+Then open **http://localhost:3001** on that same laptop.
 
-Verified run evidence: `docs/BASELINE_RUN.md`, `docs/PROJECT_STATUS.md`.
+| Service | URL / port |
+|---------|------------|
+| Core UI | http://localhost:3001 |
+| API Gateway (GraphQL) | http://localhost:4000/graphql |
+| Core API | http://localhost:3300/health |
+
+Optional webhooks: `docs/WEBHOOKS.md`. Verified agent-VM evidence: `docs/BASELINE_RUN.md`.
 
 ### Development with Nx
 

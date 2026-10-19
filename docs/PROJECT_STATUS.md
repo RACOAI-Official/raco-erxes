@@ -54,10 +54,13 @@ Domain emitters (auto fan-out from customer/deal mutations) = **follow-up**, not
 | `pnpm install` | Success |
 | build `erxes-api-shared`, `core-api`, `gateway` | Success |
 | test `erxes-api-shared` | 328 passed (pre-existing warnings) |
-| build/test `raco-brand`, `raco-llm-gateway`, `raco-webhooks` | Success (see PR checks / local nx) |
-| `core-api` smoke | Connected to Mongo; joined `:3300` |
+| build/test `raco-brand`, `raco-llm-gateway`, `raco-webhooks` | Success (11 tests) |
+| **`pnpm dev:core-api`** | **Up** — `:3300/health` 200; Gateway GraphQL `:4000` 200; Router started |
+| **`pnpm dev:uis`** | **Up** — http://localhost:3001 200 (Rspack compiled) |
+| `raco-webhooks` | **Up** — `:3391/health` 200 (`enabled=false` until configured) |
+| Full plugin remotes (`ENABLED_PLUGINS` + `dev:apis`) | Not run (core-only; leave `ENABLED_PLUGINS` unset) |
 
-Detail: [BASELINE_RUN.md](./BASELINE_RUN.md)
+Detail: [BASELINE_RUN.md](./BASELINE_RUN.md) · README Quick Start includes fork recipe
 
 ---
 

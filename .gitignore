@@ -80,3 +80,4 @@ backend/**/generated/
 .raco-*.log
 .raco-local-credentials.json
 frontend/core-ui/src/assets/raco-source.tar.gz
+deploy/raco/server.env

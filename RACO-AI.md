@@ -7,6 +7,10 @@ was added. `VERSION=os` selects the existing self-hosted application mode.
 
 ## Start on Windows
 
+For GitHub Actions, versioned container images, and the manual server deployment
+workflow, see [CI/CD setup](deploy/raco/README.md). Live CD stays disabled until
+the production server, environment, and SSH credentials are configured.
+
 Start Docker Desktop, then run from the repository root:
 
 ```powershell

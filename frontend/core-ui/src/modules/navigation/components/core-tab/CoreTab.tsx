@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { Button, activePluginState, cn } from 'erxes-ui';
 import { IconInbox, IconSearch, IconSettings } from '@tabler/icons-react';
 import { INBOX_TAB_ID, useAppTabs } from '@/navigation/hooks/useAppTabs';
@@ -56,7 +57,7 @@ export const CoreTab = () => {
     (activity) => activity.id !== INBOX_TAB_ID,
   );
   const companyName =
-    organization?.orgShortName || organization?.name || 'erxes';
+    organization?.orgShortName || organization?.name || 'Raco AI';
 
   // Search scopes to the open plugin; the inbox tab is not a plugin.
   useEffect(() => {

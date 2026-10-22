@@ -1,6 +1,6 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { Logo } from '@/auth/components/Logo';
 import { Polygons } from './Polygons';
-import { useTranslation } from 'react-i18next';
 
 interface AuthenticationLayoutProps {
   children: React.ReactNode;
@@ -8,7 +8,6 @@ interface AuthenticationLayoutProps {
 export const AuthenticationLayout = ({
   children,
 }: AuthenticationLayoutProps) => {
-  const { t } = useTranslation('common', { keyPrefix: 'auth' });
   return (
     <div className="relative overflow-hidden lg:w-1/2 lg:flex-none flex-1 flex flex-col sm:pt-28 py-8 h-dvh bg-[radial-gradient(#F0F1FE,#F7F8FA)] dark:bg-[radial-gradient(#0D0D0D,#161616)]">
       <div className="px-1 sm:px-6 mx-auto w-full max-w-md flex flex-col gap-8 relative">
@@ -27,26 +26,17 @@ export const AuthenticationLayout = ({
               </div>
               <div className="flex flex-col text-accent-foreground space-y-1 py-5 w-full m-0 px-0">
                 <span className="text-sm text-center">
-                  {t('accept-terms-prefix')}
+                  Raco AI · Based on erxes ·{' '}
+                  <a
+                    className="text-primary hover:underline"
+                    href="/assets/raco-source.tar.gz"
+                    download
+                  >
+                    Source code and license
+                  </a>
                 </span>
-                <span className="text-sm text-center inline-flex gap-1 justify-center">
-                  <a
-                    className="text-primary font-medium hover:underline"
-                    href="https://erxes.io/legal/terms"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {t('terms-of-use')}
-                  </a>
-                  {t('and')}
-                  <a
-                    className="text-primary font-medium hover:underline"
-                    href="https://erxes.io/legal/privacy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {t('privacy-policy')}
-                  </a>
+                <span className="text-sm text-center">
+                  Self-hosted CRM · GNU AGPLv3
                 </span>
               </div>
             </div>

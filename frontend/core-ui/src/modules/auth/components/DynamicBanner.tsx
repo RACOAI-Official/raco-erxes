@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { Polygons } from '../components/Polygons';
 import { useAtomValue } from 'jotai';
 import { currentOrganizationState } from 'ui-modules';
@@ -17,7 +18,7 @@ export const DynamicBanner = () => {
         </div>
         <div className="max-w-[500px] flex-col flex justify-center gap-2">
           <h1 className="text-2xl font-semibold leading-7 text-background dark:text-foreground">
-            {organization?.orgLoginText || t('banner-title')}
+            {organization?.orgLoginText || 'Raco AI CRM'}
           </h1>
           <p className="text-lg font-medium leading-6 text-muted-foreground">
             {organization?.orgLoginDescription || t('banner-description')}

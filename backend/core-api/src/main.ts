@@ -114,10 +114,10 @@ const fileLimiter = rateLimit({
 
 app.get('/subscriptionPlugin.js', fileLimiter, async (_req, res) => {
   const apolloSubscriptionPath = path.join(
-    require('path').resolve(
+    path.resolve(
       __dirname,
       'apollo',
-      process.env.NODE_ENV === 'production'
+      path.extname(__filename) === '.js'
         ? 'subscription.js'
         : 'subscription.ts',
     ),

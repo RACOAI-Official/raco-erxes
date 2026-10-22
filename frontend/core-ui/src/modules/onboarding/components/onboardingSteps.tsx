@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import {
   IconCircleCheck,
   IconPalette,
@@ -19,7 +20,7 @@ export interface OnboardingStepDef {
 
 export function getOnboardingSteps(isOwner?: boolean): OnboardingStepDef[] {
   const welcome: Omit<OnboardingStepDef, 'step'> = {
-    title: 'Welcome to erxes',
+    title: 'Welcome to Raco AI',
     subtitle: 'An open-source experience operating system (XOS)',
     cardTitle: 'Welcome',
     cardSubtitle: 'You are here',

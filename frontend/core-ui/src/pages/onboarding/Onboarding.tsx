@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { motion } from 'framer-motion';
 import { Button, Card, PageContainer } from 'erxes-ui';
 import { IconSun, IconKeyboard } from '@tabler/icons-react';
@@ -64,7 +65,7 @@ export const OnBoarding = () => {
                   Welcome to{' '}
                   {organization?.orgCustomOnboarding
                     ? organization?.orgShortName || 'your organization'
-                    : 'erxes 3.0'}{' '}
+                    : 'Raco AI'}{' '}
                   - A New Experience Begins!
                 </h1>
                 <p className="text-muted-foreground">
@@ -74,10 +75,8 @@ export const OnBoarding = () => {
             </Card.Header>
             <Card.Content className="space-y-8">
               <p className="text-center text-muted-foreground">
-                We've completely redesigned erxes from the ground up, bringing a
-                modern, faster, and more intuitive experience. This is just the
-                beginning—the new UX/UI will continue to evolve, with more
-                features and plugins rolling out daily.
+                Raco AI brings your contacts, companies, tasks, and AI-assisted
+                workflows together in a self-hosted CRM built on erxes.
               </p>
 
               <div className="grid gap-6 md:grid-cols-3">
@@ -109,7 +108,7 @@ export const OnBoarding = () => {
                   Your Feedback Shapes{' '}
                   {organization?.orgCustomOnboarding
                     ? organization?.orgShortName || 'your organization'
-                    : 'erxes 3.0'}
+                    : 'Raco AI'}
                 </h2>
                 <p className="text-center text-muted-foreground">
                   Your input is essential! Share your thoughts and help us

@@ -13,10 +13,16 @@
         "assets": ["backend/core-api/src/private/**/*"],
         "commands": ["pnpm build"]
       },
-      "dependsOn": ["^build", "build:packageJson"]
+      "dependsOn": ["^build", "build-package-json"]
     },
 
     "build:packageJson": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec nx run core-api:build-package-json"
+      }
+    },
+    "build-package-json": {
       "executor": "@nx/js:tsc",
       "options": {
         "main": "backend/core-api/dist/src/main.js",
@@ -34,7 +40,7 @@
       "dependsOn": ["typecheck", "build"],
       "options": {
         "cwd": "backend/core-api",
-        "command": "NODE_ENV=development && node dist/src/main.js"
+        "command": "cross-env NODE_ENV=development node dist/src/main.js"
       }
     },
 
@@ -43,7 +49,7 @@
 
       "options": {
         "cwd": "backend/core-api",
-        "command": "NODE_ENV=development pnpm dev"
+        "command": "cross-env NODE_ENV=development pnpm dev"
       }
     },
 

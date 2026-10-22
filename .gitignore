@@ -75,3 +75,8 @@ cloudflare/mail-worker/.wrangler/
 
 # printed and composed GraphQL schemas (schema:print, gateway:schema:compose)
 backend/**/generated/
+
+# Raco AI local diagnostics, credentials, and generated source offer
+.raco-*.log
+.raco-local-credentials.json
+frontend/core-ui/src/assets/raco-source.tar.gz

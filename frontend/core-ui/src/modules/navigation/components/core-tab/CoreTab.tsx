@@ -12,7 +12,7 @@ import { CoreTabFavorites } from '@/navigation/components/core-tab/CoreTabFavori
 import { CoreTabUserMenu } from '@/navigation/components/core-tab/CoreTabUserMenu';
 import { Link, useLocation } from 'react-router-dom';
 import { NotificationCount } from '@/notification/components/MyInboxNavigationItem';
-import { OrgLogoIcon } from '@/auth/components/Logo';
+import { Logo, OrgLogoIcon } from '@/auth/components/Logo';
 import { currentOrganizationState } from 'ui-modules';
 import { globalSearchOpenState } from '@/search/states/globalSearchState';
 import { useEffect } from 'react';
@@ -71,16 +71,19 @@ export const CoreTab = () => {
   }, [activeActivityId, routeActivityId, setActiveActivityId]);
 
   return (
-    <header className="flex h-10 shrink-0 items-center gap-1 border-b bg-sidebar px-2">
+    <header className="flex h-12 shrink-0 items-center gap-1 border-b bg-sidebar px-2">
       <Button
         asChild
-        className="size-7 shrink-0 px-0"
+        className="h-8 w-auto shrink-0 px-1 sm:px-3"
         size="icon"
         variant="ghost"
       >
         <Link aria-label={companyName} title={companyName} to={AppPath.Index}>
-          <span className="flex size-6 items-center justify-center rounded-md border border-border/60 bg-background shadow-xs [&>img]:size-4! [&>svg]:size-4!">
-            <OrgLogoIcon className="text-primary" />
+          <span className="hidden sm:flex items-center">
+            <Logo className="h-5 w-32" />
+          </span>
+          <span className="sm:hidden">
+            <OrgLogoIcon className="size-6" />
           </span>
         </Link>
       </Button>

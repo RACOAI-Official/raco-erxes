@@ -21,7 +21,7 @@ export interface OnboardingStepDef {
 export function getOnboardingSteps(isOwner?: boolean): OnboardingStepDef[] {
   const welcome: Omit<OnboardingStepDef, 'step'> = {
     title: 'Welcome to Raco AI',
-    subtitle: 'An open-source experience operating system (XOS)',
+    subtitle: 'Customer relationships, team operations, and applied AI',
     cardTitle: 'Welcome',
     cardSubtitle: 'You are here',
     icon: IconSparkles,

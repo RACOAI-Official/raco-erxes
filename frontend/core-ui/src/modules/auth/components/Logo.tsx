@@ -1,75 +1,72 @@
-// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
+// Raco AI branding, 2026-10-22. See RACO-CHANGES.md.
 import type { SVGProps } from 'react';
+import { cn } from 'erxes-ui';
 import { useAtomValue } from 'jotai';
 import { currentOrganizationState } from 'ui-modules';
 
-type LogoProps = SVGProps<SVGSVGElement>;
+type LogoProps = SVGProps<SVGSVGElement> & { tone?: 'auto' | 'light' };
 
-export const Logo = ({ ...props }: LogoProps) => {
+export const Logo = ({ className, tone = 'auto', ...props }: LogoProps) => {
   const organization = useAtomValue(currentOrganizationState);
   if (organization?.orgLogo) {
     return (
       <img
         src={organization.orgLogo}
         alt={organization.orgShortName || 'Raco AI'}
-        className="object-contain h-8 w-auto"
+        className={cn('h-8 w-auto object-contain', className)}
       />
     );
   }
   return (
     <svg
-      width="160"
-      height="40"
-      viewBox="0 0 160 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+      width="180"
+      height="30"
+      viewBox="0 0 450 73"
       role="img"
       aria-label="Raco AI"
+      className={cn('shrink-0', className)}
       {...props}
     >
-      <rect width="40" height="40" rx="10" fill="currentColor" />
-      <path
-        d="M12 30V10h9a6 6 0 0 1 1 12l7 8h-7l-7-9h5a3 3 0 0 0 0-6h-3v15z"
-        fill="white"
+      <image
+        href="/assets/raco-logo.png"
+        width="450"
+        height="73"
+        className={
+          tone === 'auto' ? 'brightness-0 dark:brightness-100' : undefined
+        }
       />
-      <text
-        x="50"
-        y="28"
-        fill="currentColor"
-        fontFamily="Inter, sans-serif"
-        fontSize="25"
-        fontWeight="600"
-      >
-        Raco AI
-      </text>
     </svg>
   );
 };
 
-export const OrgLogoIcon = ({ ...props }: LogoProps) => {
+export const OrgLogoIcon = ({
+  className,
+  ...props
+}: SVGProps<SVGSVGElement>) => {
   const organization = useAtomValue(currentOrganizationState);
   if (organization?.orgLogo) {
     return (
       <img
         src={organization.orgLogo}
         alt={organization.orgShortName || 'Raco AI'}
-        className="object-contain h-8 w-auto"
+        className={cn('h-8 w-auto object-contain', className)}
       />
     );
   }
   return (
     <svg
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 78 73"
+      overflow="hidden"
       role="img"
       aria-label="Raco AI"
+      className={className}
       {...props}
     >
-      <rect width="40" height="40" rx="10" fill="currentColor" />
-      <path
-        d="M12 30V10h9a6 6 0 0 1 1 12l7 8h-7l-7-9h5a3 3 0 0 0 0-6h-3v15z"
-        fill="white"
+      <image
+        href="/assets/raco-logo.png"
+        width="450"
+        height="73"
+        className="brightness-0 dark:brightness-100"
       />
     </svg>
   );

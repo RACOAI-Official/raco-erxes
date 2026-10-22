@@ -1,6 +1,11 @@
 # Raco AI local modification notice
 
 Modified on 2026-10-21 for the Raco AI self-hosted CRM adaptation.
+Brand styling updated on 2026-10-22 using the supplied Raco AI logo and the
+coral, charcoal, gray, and Instrument Sans identity from racoai.io. The original
+logo is included without redrawing; compact marks display its existing symbol.
+Login, navigation, loading, invitations, and onboarding share the supplied mark.
+Organization-specific logos and login text continue to override the defaults.
 Original erxes and third-party copyright and license notices remain applicable.
 This notice does not grant rights to upstream trademarks or Enterprise code.
 

@@ -161,6 +161,21 @@ archive. A non-development deployment also needs the existing backend Dockerfile
 router/Rover assets, environment and reverse-proxy configuration; the development
 runner is not a hardened public deployment. No public hosting is configured here.
 
+## Brand assets
+
+The default identity follows https://racoai.io as reviewed on 2026-10-22:
+coral `#ff7864`, charcoal `#29292b` / `#1e1e21`, warm white `#f7f5f0`,
+and gray `#ebebed`. Instrument Sans is requested through the existing Google
+Fonts stylesheet with local sans-serif fallbacks. Light-theme links use a
+darker coral for readable contrast; primary buttons use coral with dark text.
+Existing semantic success, warning, and error colors remain distinct.
+
+The supplied original logo is `frontend/core-ui/src/assets/raco-logo.png`.
+`Logo.tsx` renders it white on dark surfaces and uses a CSS black treatment
+on light surfaces. Compact icons and the favicon use the symbol from the
+same logo. Organization-specific logo and login copy settings are preserved.
+Upstream erxes attribution, license notices, and source downloads remain.
+
 ## Saved automation templates
 
 Open `/automations?view=templates` for five editable Raco AI workflows:

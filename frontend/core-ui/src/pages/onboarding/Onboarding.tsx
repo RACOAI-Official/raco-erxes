@@ -26,14 +26,13 @@ export const OnBoarding = () => {
   const features: FeatureProps[] = [
     {
       icon: <IconSun className="h-4 w-4" />,
-      title: 'Revamped UI',
-      description:
-        'Built with ShadCN and Radix UI, delivering a smoother, more accessible interface.',
+      title: 'Your customer workspace',
+      description: 'Keep customers, companies, and your team’s work connected.',
     },
     {
       icon: <IconKeyboard className="h-4 w-4" />,
       title: 'Keyboard Shortcuts',
-      description: 'Navigate erxes with ease using built-in shortcuts.',
+      description: 'Navigate Raco AI with built-in keyboard shortcuts.',
     },
     {
       icon: <IconSun className="h-4 w-4" />,
@@ -66,10 +65,10 @@ export const OnBoarding = () => {
                   {organization?.orgCustomOnboarding
                     ? organization?.orgShortName || 'your organization'
                     : 'Raco AI'}{' '}
-                  - A New Experience Begins!
+                  CRM
                 </h1>
                 <p className="text-muted-foreground">
-                  A Fresh Start with a New UX/UI
+                  Connect AI to your operations.
                 </p>
               </motion.div>
             </Card.Header>
@@ -97,9 +96,8 @@ export const OnBoarding = () => {
                   What to Expect?
                 </h2>
                 <p className="text-center text-muted-foreground">
-                  At launch, only a few plugins will feature the new UI, but we
-                  are actively working to upgrade the entire platform. Every
-                  day, you'll see new improvements.
+                  Start with your contacts, organize your projects, and build
+                  reusable automations around the way your team works.
                 </p>
               </div>
 
@@ -119,20 +117,19 @@ export const OnBoarding = () => {
                     variant="default"
                     onClick={() =>
                       window.open(
-                        'https://discord.gg/Mqvc9kDq',
+                        'https://racoai.io/contact',
                         '_blank',
                         'noopener,noreferrer',
                       )
                     }
                   >
-                    Join the Community
+                    Contact Raco AI
                   </Button>
                 </div>
               </div>
 
               <p className="text-sm text-center text-muted-foreground italic">
-                We've been working tirelessly for the last a month to make this
-                happen—now it's your turn to explore!
+                Custom software. Applied AI. Built around your team.
               </p>
             </Card.Content>
           </Card>

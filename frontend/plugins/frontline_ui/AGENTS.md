@@ -88,6 +88,20 @@
 
 ## Current Capabilities
 
+- OpenWA integration details include a native contact selector and text composer
+  calling `frontlineOpenwaCompose`, with validation, feedback and navigation to
+  the stored conversation. The OpenWA automation send action has an editable
+  text body, optional recipient binding, and a node summary. These are owned by
+  `OpenwaCompose.tsx` and `OpenwaAction.tsx` in `integrations/openwa`.
+
+- `openwa-messenger` renders WhatsApp messages through the canonical inbox and
+  supports text replies. The integration catalogue/detail show the server-managed
+  OpenWA connection and link to the local OpenWA dashboard for phone pairing.
+  `src/modules/integrations/openwa/` owns its English fallback translations and
+  the configuration/summary for the separate OpenWA message automation trigger.
+  File attachment controls are hidden for outgoing OpenWA text messages; internal
+  notes keep normal file controls.
+
 - AI knowledge source selector (`widgets/automations/modules/knowledgebase`):
   a topic/category tree above the article list. Checking a topic or category
   sends `config.topicIds` / `config.categoryIds` (hand-picked articles move to
@@ -988,6 +1002,15 @@ to, bouncedRecipients, retryable, canRetry }` for its delivery state;
   state and deliberately not persisted.
 
 ## Local Invariants
+
+- The OpenWA composer retains its request ID when retrying a failed send and
+  resets it after confirmed success. Its mutation and the automation action use
+  Core contacts, not raw phone destinations supplied by browser payloads.
+
+- OpenWA API keys and webhook signing secrets must never enter frontend code or
+  GraphQL/UI payloads. OpenWA messages use the native inbox subscription/cache
+  flow. Its separate trigger type is `frontline:inbox.openwaMessages`; do not
+  change the existing messenger-widget trigger semantics.
 
 - Customer media is recognised by its URL (`isUnverifiedAttachment` in
   `ticket/hooks/useUnverifiedAttachments.ts`): uploads here are storage keys

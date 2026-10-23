@@ -233,6 +233,7 @@ export const MessageInput = ({
         integrationChannelId={integration?.channelId ?? undefined}
         isDiscord={isDiscord}
         isTelegram={isTelegram}
+        textOnly={integration?.kind === IntegrationType.OPENWA_MESSENGER && !isInternalNote}
         isMessenger={isMessenger}
         isInternalNote={isInternalNote}
         isUploading={isUploading || isGalleryUploading}

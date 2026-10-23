@@ -1,4 +1,5 @@
 export enum IntegrationType {
+  OPENWA_MESSENGER = 'openwa-messenger',
   MAIL = 'mail',
   FACEBOOK_POST = 'facebook-post',
   FACEBOOK_MESSENGER = 'facebook-messenger',

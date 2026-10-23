@@ -22,6 +22,7 @@ type ComposerToolbarProps = {
   integrationChannelId?: string;
   isDiscord: boolean;
   isTelegram?: boolean;
+  textOnly?: boolean;
   isMessenger: boolean;
   isInternalNote: boolean;
   isUploading: boolean;
@@ -38,6 +39,7 @@ export const ComposerToolbar = ({
   integrationChannelId,
   isDiscord,
   isTelegram = false,
+  textOnly = false,
   isMessenger,
   isInternalNote,
   isUploading,
@@ -82,24 +84,28 @@ export const ComposerToolbar = ({
         </ResponseTemplateSelector>
       )}
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={t('attach-file', 'Attach file')}
-        className="size-8 flex-none rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
-        onClick={() => fileInputRef.current?.click()}
-        disabled={isBusy}
-      >
-        <IconPaperclip className="size-4" />
-      </Button>
-      <Input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        onChange={onFilesSelected}
-        multiple
-      />
+      {!textOnly && (
+        <>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={t('attach-file', 'Attach file')}
+            className="size-8 flex-none rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isBusy}
+          >
+            <IconPaperclip className="size-4" />
+          </Button>
+          <Input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={onFilesSelected}
+            multiple
+          />
+        </>
+      )}
 
       {(isDiscord || isTelegram) && !isInternalNote && (
         <PollComposer

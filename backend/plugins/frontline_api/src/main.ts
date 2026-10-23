@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import initCallApp from '@/integrations/call/initApp';
 import { initDiscord } from '@/integrations/discord/services/gateway/ownership';
 import { startPlugin } from 'erxes-api-shared/utils';
@@ -55,6 +56,11 @@ const formSubmissionExportTypes = [
   },
 ];
 
+// Reuse the platform's UI discovery contract for this local plugin process.
+if (process.env.FRONTLINE_UI_ENTRY_URL) {
+  process.env.UI_ENTRY_URL = process.env.FRONTLINE_UI_ENTRY_URL;
+}
+
 startPlugin({
   name: 'frontline',
   port: 3304,
@@ -67,7 +73,7 @@ startPlugin({
   subscriptionPluginPath: resolve(
     __dirname,
     'apollo',
-    process.env.NODE_ENV === 'production'
+    existsSync(resolve(__dirname, 'apollo', 'subscription.js'))
       ? 'subscription.js'
       : 'subscription.ts',
   ),

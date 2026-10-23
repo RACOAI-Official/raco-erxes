@@ -1,4 +1,6 @@
 import { toAiMemoryScopes } from './aiMemoryScopes';
+import { composeOpenwaMessage } from '@/integrations/openwa/outbound';
+import { getOpenwaConfig, openwaId } from '@/integrations/openwa/contract';
 import {
   AUTOMATION_ERROR_CODES,
   buildFailedAction,
@@ -425,6 +427,10 @@ export const inboxAutomationWorkers = {
     }: TAutomationProducersInput[TAutomationProducers.CHECK_CUSTOM_TRIGGER],
     _context: TCoreModuleProducerContext<IModels>,
   ) => {
+    if (collectionType === 'openwaMessages') {
+      return target?.source === 'openwa';
+    }
+
     if (collectionType === 'messages') {
       // No messenger selected keeps the trigger firing for every messenger.
       const integrationId = toStringValue(config.integrationId);
@@ -506,6 +512,29 @@ export const inboxAutomationWorkers = {
     }: TAutomationProducersInput[TAutomationProducers.RECEIVE_ACTIONS],
     { models, subdomain }: TCoreModuleProducerContext<IModels>,
   ) => {
+    if (collectionType === 'openwaMessages') {
+      try {
+        const values = await replaceOutputPlaceholders({ subdomain, execution,
+          values: (action.config || {}) as Record<string, unknown>, defaultValue: '' });
+        const target = execution.target || {};
+        const config = getOpenwaConfig();
+        const conversation = typeof target.conversationId === 'string'
+          ? await models.Conversations.findOne({ _id: target.conversationId, integrationId: config.integrationId })
+          : null;
+        const customerId = typeof values.customerId === 'string' && values.customerId.trim()
+          ? values.customerId.trim() : conversation?.customerId || target.customerId || target._id;
+        if (typeof customerId !== 'string' || typeof values.text !== 'string')
+          throw new Error('Choose a CRM contact and enter WhatsApp message text');
+        if (target.conversationId && !conversation) throw new Error('Trigger is not a conversation in the configured WhatsApp inbox');
+        const message = await composeOpenwaMessage(subdomain, {
+          customerId, text: values.text, requestId: openwaId(String(execution._id), action.id),
+        }, { fromBot: true });
+        return { result: { _id: message._id, conversationId: message.conversationId, content: message.content } };
+      } catch (error: unknown) {
+        return buildFailedAction(error instanceof Error ? error.message : 'WhatsApp send failed', AUTOMATION_ERROR_CODES.CONFIG_INVALID);
+      }
+    }
+
     if (collectionType !== 'messages') {
       return buildFailedAction(
         `Inbox automations do not handle "${collectionType}"`,

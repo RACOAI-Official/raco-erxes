@@ -1,4 +1,5 @@
 import { ChannelScopes, IChannelDocument } from '@/channel/@types/channel';
+import { getOpenwaConfig } from '@/integrations/openwa/contract';
 import {
   IArchiveParams,
   IIntegration,
@@ -83,6 +84,12 @@ export const sendCreateIntegration = async (
 ) => {
   try {
     switch (serviceName) {
+      case 'openwa': {
+        const config = getOpenwaConfig();
+        if (subdomain !== config.subdomain || data.kind !== 'openwa-messenger')
+          throw new Error('Invalid OpenWA tenant or integration kind');
+        return { status: 'success' as const };
+      }
       case 'facebook':
         return await facebookCreateIntegrations({ subdomain, data });
       case 'calls':
@@ -141,8 +148,9 @@ export const sendUpdateIntegration = async (
       case 'callpro':
         return await callProUpdateIntegration({ subdomain, data });
 
+      case 'openwa':
       case 'telegram':
-        // Common fields belong to erxes; bot credentials use telegramUpdateBot.
+        // Common fields belong to erxes; provider credentials are server-managed.
         break;
 
       case 'mobinetSms':
@@ -167,6 +175,9 @@ export const sendRemoveIntegration = async (
     switch (serviceName) {
       case 'telegram':
         return await telegramRemoveIntegration({ subdomain, data });
+      case 'openwa':
+        // Removed integrations fail the receiver/reply active-integration lookup.
+        return;
       case 'facebook':
         return await facebookRemoveIntegrations({ subdomain, data });
       case 'calls':

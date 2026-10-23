@@ -1,6 +1,11 @@
 import { IntegrationType } from '@/types/Integration';
 
 export const INTEGRATIONS = {
+  [IntegrationType.OPENWA_MESSENGER]: {
+    name: 'WhatsApp (OpenWA)',
+    descriptionKey: 'frontline-openwa:description',
+    img: 'openwa.svg',
+  },
   [IntegrationType.TELEGRAM_MESSENGER]: {
     name: 'Telegram',
     descriptionKey: 'frontline-telegram:description',

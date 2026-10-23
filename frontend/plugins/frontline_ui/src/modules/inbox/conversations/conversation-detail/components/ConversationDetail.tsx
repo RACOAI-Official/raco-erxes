@@ -107,6 +107,7 @@ export const ConversationDetail = () => {
                     'lead',
                     'discord-messenger',
                     'telegram-messenger',
+                    'openwa-messenger',
                   ].includes(integration.kind) && (
                     <ConversationMessages
                       conversationId={conversationId || ''}

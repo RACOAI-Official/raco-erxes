@@ -90,6 +90,20 @@ export const inboxAutomationConstants = {
   triggers: [
     {
       moduleName: 'inbox',
+      collectionName: 'openwaMessages',
+      icon: 'IconMessage',
+      label: 'WhatsApp message (OpenWA)',
+      description: 'Start this workflow when the connected OpenWA session receives a direct message.',
+      isCustom: true,
+      output: { variables: [
+        ...inboxMessageTriggerOutput.variables,
+        { key: 'integrationId', label: 'Integration ID' },
+        { key: 'phone', label: 'WhatsApp phone number' },
+        { key: 'source', label: 'Message source' },
+      ] },
+    },
+    {
+      moduleName: 'inbox',
       collectionName: 'conversations',
       relationType: 'event',
       icon: 'IconInbox',
@@ -148,6 +162,12 @@ export const inboxAutomationConstants = {
   ],
 
   actions: [
+    {
+      moduleName: 'inbox', collectionName: 'openwaMessages', method: 'create',
+      icon: 'IconMessage', label: 'Send WhatsApp message (OpenWA)',
+      description: 'Compose a WhatsApp text to a CRM contact, or reply to the triggering WhatsApp conversation.',
+      isAvailableOptionalConnect: true, output: inboxMessageActionOutput,
+    },
     {
       moduleName: 'inbox',
       collectionName: 'messages',

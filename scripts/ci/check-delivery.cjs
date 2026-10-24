@@ -18,6 +18,19 @@ for (const file of fs.readdirSync('.github/workflows')) {
 const ci = readYaml('.github/workflows/raco-ci.yml');
 assert.equal(ci.permissions.contents, 'read');
 assert.equal(ci.jobs.images.needs, 'verify');
+const sourceBuild = ci.jobs.verify.steps.find(
+  (step) => step.name === 'Package corresponding source and build branded UI',
+)?.run;
+assert.ok(sourceBuild, 'Missing source packaging step');
+const sourceCopy = 'cp frontend/core-ui/src/assets/raco-source.tar.gz dist/frontend/core-ui/assets/raco-source.tar.gz';
+assert.ok(
+  sourceBuild.indexOf(sourceCopy) > sourceBuild.indexOf('pnpm nx build core-ui'),
+  'Current source archive must be copied after the potentially cached UI build',
+);
+assert.ok(
+  sourceBuild.includes('cmp frontend/core-ui/src/assets/raco-source.tar.gz dist/frontend/core-ui/assets/raco-source.tar.gz'),
+  'Packaged source archive must match the current commit archive',
+);
 assert.ok(
   ci.jobs.images.steps.some(
     (step) => step.run === 'bash scripts/ci/smoke-containers.sh',

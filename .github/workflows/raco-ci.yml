@@ -64,6 +64,11 @@ jobs:
         run: |
           pnpm source:raco
           pnpm nx build core-ui
+          # Generated archives are gitignored and are not part of Nx's cache key.
+          # Always overlay this commit's archive after restoring/building the UI.
+          cp frontend/core-ui/src/assets/raco-source.tar.gz dist/frontend/core-ui/assets/raco-source.tar.gz
+          test -s dist/frontend/core-ui/assets/raco-source.tar.gz
+          cmp frontend/core-ui/src/assets/raco-source.tar.gz dist/frontend/core-ui/assets/raco-source.tar.gz
       - uses: actions/upload-artifact@v4
         with:
           name: raco-build-${{ github.sha }}

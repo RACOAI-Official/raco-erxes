@@ -16,6 +16,10 @@ const buildMailReplySchema = (messageRequired: string) =>
     subject: z.string().optional().default(''),
     content: z.string().trim().min(1, messageRequired),
     shouldResolve: z.boolean().optional().default(false),
+    mode: z.enum(['compose', 'reply']).optional(),
+    integrationId: z.string().optional(),
+    customerId: z.string().optional(),
+    to: z.string().optional(),
   });
 
 export type TMailReplyActionForm = z.infer<
@@ -35,6 +39,10 @@ const readConfig = (config: unknown): TMailReplyActionForm => {
     subject: value.subject || '',
     content: value.content || '',
     shouldResolve: Boolean(value.shouldResolve),
+    mode: value.mode,
+    integrationId: value.integrationId,
+    customerId: value.customerId,
+    to: value.to,
   };
 };
 
@@ -79,6 +87,15 @@ export const MailReplyActionForm = ({
   return (
     <Form {...form}>
       <div className="p-4 space-y-4">
+        {form.watch('mode') === 'compose' && (['integrationId', 'customerId', 'to'] as const).map((name) => (
+          <Form.Field key={name} control={control} name={name} render={({ field }) => (
+            <Form.Item>
+              <Form.Label>{name === 'to' ? t('to', 'To') : name === 'customerId' ? t('mail-compose-customer', 'Contact binding (optional)') : t('mail-compose-inbox', 'Sending inbox binding')}</Form.Label>
+              <Form.Control><Input {...field} value={field.value || ''} /></Form.Control>
+              <Form.Message />
+            </Form.Item>
+          )} />
+        ))}
         <Form.Field
           control={control}
           name="subject"

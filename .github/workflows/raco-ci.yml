@@ -13,12 +13,19 @@ env:
   NX_DAEMON: 'false'
   NX_ISOLATE_PLUGINS: 'false'
   NX_NO_CLOUD: 'true'
-  ENABLED_PLUGINS: operation
+  ENABLED_PLUGINS: operation,frontline
   NODE_OPTIONS: --max-old-space-size=6144
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    services:
+      saas-mongo:
+        image: mongo:7
+        ports: ['27018:27017']
+      saas-redis:
+        image: redis:7-alpine
+        ports: ['16389:6379']
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -43,9 +50,16 @@ jobs:
         continue-on-error: true
         run: pnpm nx run-many -t lint -p core-ui core-api gateway operation_api automations-service --parallel=1
       - name: Build backend services
-        run: pnpm nx run-many -t build -p core-api gateway operation_api automations-service --parallel=1
+        run: pnpm nx run-many -t build -p core-api gateway operation_api frontline_api automations-service --parallel=1
+      - name: SaaS trial and provisioning regression tests
+        run: |
+          pnpm exec jest --config backend/erxes-api-shared/jest.config.ts --runInBand --testMatch='**/raco-access.spec.ts'
+          pnpm exec jest --config backend/core-api/src/modules/raco-saas/jest.config.cjs --runInBand
+          RACO_SAAS_TEST_MONGO_URL='mongodb://127.0.0.1:27018/test?directConnection=true' RACO_SAAS_TEST_REDIS_PORT=16389 node scripts/raco-saas-smoke.cjs
       - name: Build operation UI
         run: pnpm nx build operation_ui
+      - name: Build frontline UI
+        run: pnpm nx build frontline_ui
       - name: Package corresponding source and build branded UI
         run: |
           pnpm source:raco
@@ -59,6 +73,7 @@ jobs:
             backend/core-api/dist/
             backend/gateway/dist/
             backend/plugins/operation_api/dist/
+            backend/plugins/frontline_api/dist/
             backend/services/automations/dist/
             backend/erxes-api-shared/dist/
             backend/erxes-api-shared/utils/
@@ -66,6 +81,7 @@ jobs:
             backend/erxes-api-shared/core-modules/
             dist/frontend/core-ui/
             dist/frontend/plugins/operation_ui/
+            dist/frontend/plugins/frontline_ui/
       - name: Validation scope
         if: always()
         run: |

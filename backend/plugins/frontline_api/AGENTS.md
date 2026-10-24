@@ -61,6 +61,24 @@
 
 ## Current Capabilities
 
+- `frontlineMailComposeDraft` creates a contact-linked email conversation and
+  pending draft without delivery; it requires send permission and inbox access.
+  Draft automation config `mode: compose` accepts inbox, recipient, subject and
+  content bindings. Reply workflows continue to use the existing draft action.
+  Only authenticated `mailDraftApprove` sends these drafts.
+
+- Operator-managed Mailcow inboxes use native kind `mail` with creation data
+  `{provider: 'mailcow'}`. Server configuration pins `MAILCOW_SUBDOMAIN` and
+  `MAILCOW_ADDRESS`; SMTP is selected only for that tenant and exact sender,
+  with mandatory TLS. Secrets stay in private environment variables, never
+  integration details. Existing Cloudflare mail remains on its own transport.
+
+- Mailcow inbound bridge: `src/modules/integrations/mail/mailcow/bridge.py`
+  reads IMAPS without changing flags and posts to the existing signed mail
+  webhook. It uses a persistent UID checkpoint, starts with new mail only, and
+  requires a mailbox credential plus a derived tenant key. Exact configured
+  senders can reply through the Mailcow SMTP transport; see its README.
+
 - OpenWA composition: authenticated `frontlineOpenwaCompose` checks send permission
   and inbox visibility, sends to the selected Core contact's international phone,
   and records canonical inbox history. `outbound.ts` supplies shared composition

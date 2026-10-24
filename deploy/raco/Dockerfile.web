@@ -3,6 +3,8 @@ ARG SOURCE_REPOSITORY
 LABEL org.opencontainers.image.source=$SOURCE_REPOSITORY
 COPY dist/frontend/core-ui/ /usr/share/nginx/html/
 COPY dist/frontend/plugins/operation_ui/ /usr/share/nginx/html/plugins/operation/
+COPY dist/frontend/plugins/frontline_ui/ /usr/share/nginx/html/plugins/frontline/
+COPY --chmod=755 deploy/raco/saas/runtime-env.sh /docker-entrypoint.d/40-raco-saas.sh
 COPY deploy/raco/nginx.conf /etc/nginx/conf.d/default.conf
 # Runtime settings contain only the public, same-origin API route.
 RUN mkdir -p /usr/share/nginx/html/js \

@@ -68,6 +68,12 @@ export const MailDraftCard: React.FC<MailDraftCardProps> = ({
       ),
     }).then(() => run('remove', onRemove));
 
+  const approve = () => confirm({
+    message: t('mail-draft-approval-confirm',
+      'Approve sending this email to {{recipients}} with subject “{{subject}}”? Review the message below before confirming.',
+      { recipients: (draft.to ?? []).join(', '), subject: draft.subject || '(No subject)' }),
+  }).then(() => run('approve', onApprove));
+
   const sourceName = describeSource(source);
   const sourceTime = source?.createdAt ?? draft.createdAt;
 
@@ -118,7 +124,7 @@ export const MailDraftCard: React.FC<MailDraftCardProps> = ({
           <div className="flex items-center gap-2 px-4 h-12 border-t border-primary/20">
             <Button
               size="sm"
-              onClick={() => run('approve', onApprove)}
+              onClick={approve}
               disabled={busy}
             >
               {sending ? <Spinner size="sm" /> : <IconSend size={14} />}

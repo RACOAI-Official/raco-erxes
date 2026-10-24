@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import { toast } from 'erxes-ui';
+import { toast, useConfirm } from 'erxes-ui';
 import {
   MAIL_MESSAGE_RETRY_MUTATION,
   MAIL_SEND_MAIL_MUTATION,
@@ -41,6 +41,7 @@ export const useDeliveryToast = () => {
 };
 
 export const useMailSendMail = () => {
+  const { confirm } = useConfirm();
   const { t } = useTranslation('frontline');
   const showDeliveryOutcome = useDeliveryToast();
   const [sendMailMutation, { loading }] = useMutation(MAIL_SEND_MAIL_MUTATION);
@@ -50,7 +51,10 @@ export const useMailSendMail = () => {
     onCompleted?: () => void,
     onOutcome?: (outcome: MailDeliveryOutcome) => void,
   ) => {
-    sendMailMutation({
+    confirm({ message: t('mail-send-approval-confirm',
+      'Approve sending this email to {{recipients}} with subject “{{subject}}”?',
+      { recipients: [...variables.to, ...(variables.cc ?? []), ...(variables.bcc ?? [])].join(', '), subject: variables.subject }),
+    }).then(() => sendMailMutation({
       variables,
       onCompleted: (data) => {
         showDeliveryOutcome(data?.mailSendMail);
@@ -71,7 +75,7 @@ export const useMailSendMail = () => {
       refetchQueries: variables.conversationId
         ? ['mailConversationDetail', 'Conversations']
         : ['Conversations'],
-    });
+    }));
   };
 
   return { mailSendMail, loading };
@@ -107,12 +111,13 @@ export const useMailSendReaction = () => {
 };
 
 export const useMailMessageRetry = () => {
+  const { confirm } = useConfirm();
   const { t } = useTranslation('frontline');
   const showDeliveryOutcome = useDeliveryToast();
   const [retryMutation, { loading }] = useMutation(MAIL_MESSAGE_RETRY_MUTATION);
 
   const mailMessageRetry = (_id: string, onCompleted?: () => void) => {
-    retryMutation({
+    confirm({ message: t('mail-retry-approval-confirm', 'Approve sending this email again? Review the original recipients and message before confirming.') }).then(() => retryMutation({
       variables: { _id },
       onCompleted: (data) => {
         showDeliveryOutcome(data?.mailMessageRetry);
@@ -130,7 +135,7 @@ export const useMailMessageRetry = () => {
         });
       },
       refetchQueries: ['mailConversationDetail'],
-    });
+    }));
   };
 
   return { mailMessageRetry, loading };

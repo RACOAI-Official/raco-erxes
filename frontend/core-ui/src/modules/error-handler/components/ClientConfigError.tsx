@@ -1,6 +1,7 @@
 import { BotRunner } from '@/error-handler/components/BotRunner';
 import { GenericErrorFallback } from '@/error-handler/components/GenericErrorFallback';
 import { useBackendRecovery } from '@/error-handler/hooks/useBackendRecovery';
+import { Button } from 'erxes-ui';
 
 type ClientConfigErrorProps = {
   error?: Error;
@@ -20,6 +21,7 @@ export const ClientConfigError = ({ error }: ClientConfigErrorProps) => {
       title="Unable to reach backend"
     >
       <BotRunner />
+      {window.env?.RACO_SAAS_DOMAIN && <Button onClick={() => window.location.assign('/saas')}>Workspace subscription status</Button>}
     </GenericErrorFallback>
   );
 };

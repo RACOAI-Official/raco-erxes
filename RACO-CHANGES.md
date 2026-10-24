@@ -1,5 +1,12 @@
 # Raco AI local modification notice
 
+On 2026-10-24, added an opt-in Raco XOS SaaS configuration: verified self-service
+workspace signup, per-organization databases, 14-day trial access controls,
+owner subscription status, configurable plan descriptions/prices and disabled
+checkout. The public portal and container overlay target xos.racoai.io. No SaaS
+deployment, DNS changes or conversion of existing customer data were performed.
+Disposable tenant-isolation tests and CI coverage accompany the new modules.
+
 Modified on 2026-10-21 for the Raco AI self-hosted CRM adaptation.
 Brand styling updated on 2026-10-22 using the supplied Raco AI logo and the
 coral, charcoal, gray, and Instrument Sans identity from racoai.io. The original
@@ -24,3 +31,5 @@ The source archive includes the current versions of changed files as later tar
 entries overlaying the upstream checkout. Extract the complete archive normally
 to obtain those versions. `.env`, local credentials and generated runtime data
 are excluded. The working checkout's earlier user changes are retained.
+
+2026-10-24: Added opt-in SSLCommerz BDT hosted checkout, monthly/yearly calendar renewals, validated signed IPN handling, payment history and isolated mock payment checks. Merchant account, credentials, prices and deployment remain pending.

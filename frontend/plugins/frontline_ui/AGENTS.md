@@ -88,6 +88,10 @@
 
 ## Current Capabilities
 
+- Email drafts show a recipient/subject confirmation before approval sends them.
+  Manual email composition/replies also confirm through `useMailSendMail`.
+  Compose-mode draft automation settings retain inbox/contact/recipient bindings.
+
 - OpenWA integration details include a native contact selector and text composer
   calling `frontlineOpenwaCompose`, with validation, feedback and navigation to
   the stored conversation. The OpenWA automation send action has an editable

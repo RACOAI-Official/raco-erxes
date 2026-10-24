@@ -16,6 +16,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { retryGetProxyTargets } from '~/proxy/targets';
 import { startRouter, stopRouter } from '~/apollo-router';
 import userMiddleware from '~/middlewares/userMiddleware';
+import { racoSaasProxy } from './middlewares/raco-saas';
 import { initMQWorkers } from '~/mq/workers/workers';
 import {
   applyProxiesCoreless,
@@ -147,6 +148,10 @@ app.use(async (req, res, next) => {
 
   return cors(corsOptions)(req, res, next);
 });
+
+// Signup and subscription status must work before a workspace exists and after
+// a trial expires. Every tenant CRM route below still uses userMiddleware.
+app.use('/saas', racoSaasProxy);
 
 app.use(userMiddleware);
 

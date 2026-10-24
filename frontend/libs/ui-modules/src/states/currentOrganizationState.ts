@@ -1,6 +1,7 @@
 import { atom } from 'jotai';
 
 export type CurrentOrganization = {
+  racoManaged?: boolean;
   name: string;
   hasOwner?: boolean;
   logo?: string;

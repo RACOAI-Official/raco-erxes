@@ -4,6 +4,9 @@ import {
   TAutomationProducersInput,
 } from 'erxes-api-shared/core-modules';
 import { IModels } from '~/connectionResolvers';
+import { composeMailDraft } from '@/integrations/mail/utils/composeDraft';
+import { replaceOutputPlaceholders } from 'erxes-api-shared/core-modules';
+import { toMailHtml } from '@/integrations/mail/utils/textFormat';
 import {
   MAIL_AI_HISTORY_LIMIT,
   MAIL_DRAFT_COLLECTION,
@@ -133,6 +136,18 @@ export const mailAutomationWorkers = {
     }
 
     if (collectionType === MAIL_DRAFT_COLLECTION) {
+      if (action.config?.mode === 'compose') {
+        const config = await replaceOutputPlaceholders({
+          subdomain, execution, values: action.config, defaultValue: '', keepUnresolvedPlaceholders: false,
+        });
+        const text = (key: string) => typeof config[key] === 'string' ? config[key] : '';
+        const draft = await composeMailDraft(models, subdomain, {
+          integrationId: text('integrationId'), customerId: text('customerId') || undefined,
+          to: text('to'), subject: text('subject'), body: toMailHtml(text('content')),
+          requestId: `${execution._id}:${action.id}`,
+        });
+        return { result: { draftId: draft._id, subject: draft.subject, conversationId: draft.inboxConversationId } };
+      }
       return await actionCreateMailDraft({
         models,
         subdomain,

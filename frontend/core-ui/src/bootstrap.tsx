@@ -15,14 +15,24 @@ import './styles.css';
 import { App } from '@/app/components/App';
 import { ClientConfigError } from '@/error-handler/components/ClientConfigError';
 import { initSentry } from './sentry';
+import { SaasPortal } from './modules/raco-saas/SaasPortal';
 
 // Install browser error handlers as early as possible, before any rendering.
-initSentry();
+if (!window.location.pathname.startsWith('/saas') && window.location.hostname !== window.env?.RACO_SAAS_DOMAIN) {
+  initSentry();
+}
 
 async function initFederation() {
   const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement,
   );
+
+  // The public portal must render without tenant discovery or an owner session.
+  if (window.location.pathname === '/saas' || window.location.pathname === '/saas/' ||
+      window.location.hostname === window.env?.RACO_SAAS_DOMAIN) {
+    root.render(<SaasPortal />);
+    return;
+  }
 
   if (NODE_ENV === 'development') {
     // Nx serves monorepo plugins. A plugin outside the monorepo announces its

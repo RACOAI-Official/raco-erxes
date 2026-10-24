@@ -2,8 +2,9 @@
 
 This is the existing erxes checkout adapted for local, self-hosted Raco AI use.
 Use Node 22 and pnpm 9.12.3. Existing MongoDB data, Docker volumes, Redis data,
-and local environment values are retained. No billing or tenant provisioning
-was added. `VERSION=os` selects the existing self-hosted application mode.
+and local environment values are retained. `VERSION=os` selects the existing
+self-hosted application mode. The separate [SaaS configuration](deploy/raco/saas/README.md)
+adds verified signup and 14-day trials; it is not deployed. SSLCommerz BDT monthly/yearly checkout is implemented but stays disabled until merchant credentials, prices and explicit enablement are configured.
 
 ## Start on Windows
 

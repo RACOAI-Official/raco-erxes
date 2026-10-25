@@ -1,5 +1,4 @@
 import { OrgLogoIcon } from '@/auth/components/Logo';
-import { Polygons } from '@/auth/components/Polygons';
 import { cn, Spinner, TextEffect } from 'erxes-ui';
 import { AnimatePresence, motion, Variants } from 'motion/react';
 import { useEffect, useState } from 'react';
@@ -13,13 +12,8 @@ export const LoadingScreen = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="absolute inset-0 w-full h-full overflow-hidden bg-[radial-gradient(50%_100%_at_50%_0%,#F0F1FE_0%,#F7F8FA_100%)] dark:bg-[radial-gradient(50%_100%_at_50%_0%,#0D0D0D_0%,#161616_100%)]"
-        >
-          <Polygons
-            variant="welcome"
-            className="absolute top-0 left-1/2 -translate-x-1/2"
-          />
-        </motion.div>
+          className="absolute inset-0 w-full h-full overflow-hidden bg-background"
+        />
         <div className="flex flex-col gap-3 items-center justify-center relative z-10">
           <div className="size-10 rounded-lg shadow-xs flex items-center justify-center overflow-hidden">
             <IconAnimation />

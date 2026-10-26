@@ -14,5 +14,4 @@ Login, loading, navigation and onboarding use the same identity. Upstream erxes
 attribution and license notices are retained.
 
 Rebuild the core-ui frontend to see these source changes in a deployment.
-The working development branch is codex/raco-ai-local; main receives this
-branding-only update without replacing its separate backend/integration work.
+The current integrated application is maintained on main. Historical development branches are archived after consolidation; standalone backend/integration work is retained.

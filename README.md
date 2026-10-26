@@ -1,3 +1,20 @@
+# RacoAI CRM
+
+`main` is the consolidated RacoAI CRM source: logo/theme, OpenWA WhatsApp,
+Mailcow drafts with human approval, Raco LLM automation, SaaS trials and
+opt-in SSLCommerz billing. Standalone brand, LLM-gateway and outbound-webhook
+services and collaborator documentation are retained.
+
+Start with [local operation](RACO-AI.md), [SaaS setup](deploy/raco/saas/README.md),
+[deployment configuration](deploy/raco/README.md), and [brand assets](RACO-BRANDING.md).
+SaaS is not deployed by this merge; payment collection stays disabled until
+merchant credentials and prices are configured. Keep secrets out of Git.
+
+Historical branch tips are preserved under the `archive/branches-2026-10-26`
+tag with a `branches.json` recovery inventory. Use short-lived branches for
+future changes and delete them after merging into `main`.
+
+---
 <br>
 
 <p align="center">

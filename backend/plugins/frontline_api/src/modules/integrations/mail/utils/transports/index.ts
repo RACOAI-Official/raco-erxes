@@ -1,4 +1,6 @@
 import { IMailIntegrationDocument } from '@/integrations/mail/@types/integration';
+import { readMailcowConfig } from '@/integrations/mail/mailcow/config';
+import { createMailcowTransport } from '@/integrations/mail/mailcow/transport';
 import { buildTaggedAddress } from '@/integrations/mail/utils/address';
 import {
   ICloudflareSendingAccount,
@@ -40,7 +42,11 @@ const resolveSigner = async (subdomain: string): Promise<TMailSigner> => {
   return { ok: false, reason: lookup.reason };
 };
 
-const resolveTransport = async (subdomain: string): Promise<IMailTransport> => {
+const resolveTransport = async (subdomain: string, from: string): Promise<IMailTransport> => {
+  const mailcow = readMailcowConfig(subdomain);
+  if (mailcow && from.toLowerCase() === mailcow.address) {
+    return createMailcowTransport(subdomain, mailcow);
+  }
   const signer = await resolveSigner(subdomain);
 
   if (!signer.ok) {
@@ -60,7 +66,7 @@ export const sendMail = async (
   subdomain: string,
   input: ISendMailInput,
 ): Promise<ISendMailResult> =>
-  await deliver(subdomain, await resolveTransport(subdomain), input);
+  await deliver(subdomain, await resolveTransport(subdomain, input.from), input);
 
 export {
   buildMessageId,

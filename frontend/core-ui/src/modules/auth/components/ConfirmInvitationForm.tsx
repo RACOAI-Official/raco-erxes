@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { OrgLogoIcon } from '@/auth/components/Logo';
 import { useUserConfirmInvitation } from '@/auth/hooks/useUserConfirmInvitation';
 import { AppPath } from '@/types/paths/AppPath';
@@ -133,7 +134,7 @@ export const ConfirmInvitationForm = () => {
             <p className="text-muted-foreground text-base">
               Join{' '}
               <span className="font-semibold text-foreground">
-                {currentOrganization?.orgShortName || 'erxes'}
+                {currentOrganization?.orgShortName || 'Raco AI'}
               </span>{' '}
               and start collaborating
             </p>

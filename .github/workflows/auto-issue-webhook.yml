@@ -9,6 +9,7 @@ jobs:
     name: Send issue to auto-fix listener
     permissions: {}
     if: |
+      github.repository_owner == 'erxes' &&
       github.event.issue.pull_request == null &&
       (
         contains(github.event.issue.labels.*.name, 'bug') ||

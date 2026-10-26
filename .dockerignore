@@ -1,0 +1,18 @@
+.git
+**/node_modules
+.nx
+tmp
+coverage
+**/.env
+**/.env.*
+**/server.env
+.ssh
+.raco-*
+**/*.log
+.aws
+.codex
+.agents
+) {
+= @(
+backend/gateway/**/apollo-router/temp
+backend/gateway/**/subscription/plugins/downloads

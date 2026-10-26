@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import type { TAiAgentInput } from '../aiAgent';
 import { anthropicMessagesBridge } from './anthropicMessages';
 import { openAiCompatibleBridge } from './openaiCompatible';
@@ -7,6 +8,8 @@ import type {
   TAiBridgeToolDefinition,
 } from './types';
 import { resolveAiProviderConnection } from '../providers';
+import { resolveRacoFallback } from '../providers/racoFallback';
+import { invokeWithRacoFallback } from './racoFallback';
 
 const providerBridgeRegistry: Record<string, IAiProviderBridge> = {
   'cloudflare-ai-gateway': openAiCompatibleBridge,
@@ -58,14 +61,25 @@ export const invokeAiProvider = async (
   });
   const bridge = getAiProviderBridge(connection.provider);
 
-  return await bridge.invoke({
+  const input = {
     connection,
     runtime: agent.runtime,
     messages,
     responseFormat: options?.responseFormat,
     tools: options?.tools,
     toolChoice: options?.toolChoice,
-  });
+  };
+  const fallback =
+    connection.provider === 'openai'
+      ? resolveRacoFallback(connection.config.baseUrl || '', subdomain)
+      : undefined;
+
+  return invokeWithRacoFallback(
+    () => bridge.invoke(input),
+    fallback
+      ? () => openAiCompatibleBridge.invoke({ ...input, connection: fallback })
+      : undefined,
+  );
 };
 
 export * from './types';

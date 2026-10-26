@@ -1,3 +1,20 @@
+# RacoAI CRM
+
+`main` is the consolidated RacoAI CRM source: logo/theme, OpenWA WhatsApp,
+Mailcow drafts with human approval, Raco LLM automation, SaaS trials and
+opt-in SSLCommerz billing. Standalone brand, LLM-gateway and outbound-webhook
+services and collaborator documentation are retained.
+
+Start with [local operation](RACO-AI.md), [SaaS setup](deploy/raco/saas/README.md),
+[deployment configuration](deploy/raco/README.md), and [brand assets](RACO-BRANDING.md).
+SaaS is not deployed by this merge; payment collection stays disabled until
+merchant credentials and prices are configured. Keep secrets out of Git.
+
+Historical branch tips are preserved under the `archive/branches-2026-10-26`
+tag with a `branches.json` recovery inventory. Use short-lived branches for
+future changes and delete them after merging into `main`.
+
+---
 <br>
 
 <p align="center">
@@ -111,12 +128,12 @@ erxes is built as an **Nx-powered monorepo** with a modern microservices archite
 
 ### Prerequisites
 
-- **Node.js** 18+
-- **pnpm** ≥ 8 (required)
+- **Node.js** 18+ (CI / Raco fork baseline: **22**)
+- **pnpm** ≥ 8 (required; `packageManager`: **pnpm@9.12.3**)
 - **MongoDB** 27017
 - **Redis** 6379
 
-### Installation
+### Installation (official upstream recipe)
 
 ```bash
 # Clone the repository
@@ -127,13 +144,14 @@ cd erxes
 pnpm install
 
 # Set up environment variables
-cp .env.example .env
-# Edit .env and configure MONGO_URL, REDIS_HOST, etc.
+# NOTE: this tree ships `.env.sample` (not `.env.example`). Prefer:
+cp .env.sample .env
+# Edit .env and configure MONGO_URL, REDIS_HOST, etc. — never commit secrets
 
 # Start core services (Gateway + Core API)
 pnpm dev:core-api
 
-# Or start all APIs
+# Or start all plugin APIs (required if ENABLED_PLUGINS is set)
 pnpm dev:apis
 
 # Start all UI plugins (in another terminal)
@@ -141,6 +159,41 @@ pnpm dev:uis
 ```
 
 Access the application at `http://localhost:3001`
+
+### Raco AI fork — run on **your laptop** (standalone / self-hosted)
+
+Writable fork: `https://github.com/razin0900/https-github.com-razin0900-erxes`  
+Product shape: **standalone** (not multi-tenant SaaS). Licence gate remains **NOT APPROVED** for commercial claims — see `docs/COMMERCIAL_LAUNCH_GATE.md`.
+
+**Cloud agent `localhost` ≠ your laptop.** To open the app in your browser, clone and start the stack on the machine where you browse. Full laptop guide (Windows-friendly): **[`docs/LAPTOP_LOCAL_RUN.md`](./docs/LAPTOP_LOCAL_RUN.md)**.
+
+```bash
+git clone https://github.com/razin0900/https-github.com-razin0900-erxes.git
+cd https-github.com-razin0900-erxes
+git checkout main
+
+# Mongo + Redis must already be on 27017 / 6379 (Docker Desktop example in LAPTOP_LOCAL_RUN.md)
+
+pnpm install
+cp .env.sample .env   # first time only — edit MONGO_URL, REDIS_HOST, REDIS_PORT, REACT_APP_API_URL
+# Leave ENABLED_PLUGINS unset for core-only. Never set ENABLED_PLUGINS= (empty).
+
+# Terminal 1
+pnpm dev:core-api
+
+# Terminal 2
+pnpm dev:uis
+```
+
+Then open **http://localhost:3001** on that same laptop.
+
+| Service | URL / port |
+|---------|------------|
+| Core UI | http://localhost:3001 |
+| API Gateway (GraphQL) | http://localhost:4000/graphql |
+| Core API | http://localhost:3300/health |
+
+Optional webhooks: `docs/WEBHOOKS.md`. Verified agent-VM evidence: `docs/BASELINE_RUN.md`.
 
 ### Development with Nx
 

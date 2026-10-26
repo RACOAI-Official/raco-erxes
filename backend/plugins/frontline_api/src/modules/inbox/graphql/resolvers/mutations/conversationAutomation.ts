@@ -1,4 +1,5 @@
 import { IConversationDocument } from '@/inbox/@types/conversations';
+import { handleOpenwaIntegration } from '@/integrations/openwa/service';
 import {
   AUTOMATED_REPLY_REASON,
   AUTOMATED_REPLY_STATUS,
@@ -38,6 +39,8 @@ export const dispatchConversationToService = async (
 ) => {
   try {
     switch (serviceName) {
+      case 'openwa':
+        return await handleOpenwaIntegration({ subdomain, data });
       case 'facebook':
         return await handleFacebookIntegration({ subdomain, data });
 

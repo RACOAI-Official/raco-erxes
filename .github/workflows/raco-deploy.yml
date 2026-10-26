@@ -1,0 +1,64 @@
+name: Raco Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Full 40-character SHA of a successful Raco CI run
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: raco-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: vars.RACO_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - name: Verify a successful release pipeline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ inputs.commit }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          [[ "$COMMIT" =~ ^[a-f0-9]{40}$ ]] || exit 2
+          gh api "repos/$REPOSITORY/actions/workflows/raco-ci.yml/runs?head_sha=$COMMIT&status=success&event=push" \
+            --jq '.workflow_runs | length > 0' | grep -qx true
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit }}
+          persist-credentials: false
+      - name: Deploy checked release over SSH
+        env:
+          DEPLOY_HOST: ${{ vars.RACO_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.RACO_DEPLOY_USER }}
+          DEPLOY_PORT: ${{ vars.RACO_DEPLOY_PORT || '22' }}
+          DEPLOY_PATH: ${{ vars.RACO_DEPLOY_PATH }}
+          SSH_PRIVATE_KEY: ${{ secrets.RACO_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.RACO_SSH_KNOWN_HOSTS }}
+          COMMIT: ${{ inputs.commit }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          [[ "$DEPLOY_HOST" =~ ^[a-zA-Z0-9.-]+$ && "$DEPLOY_HOST" != -* ]] || exit 2
+          [[ "$DEPLOY_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] || exit 2
+          [[ "$DEPLOY_PORT" =~ ^[0-9]+$ && "$DEPLOY_PORT" -ge 1 && "$DEPLOY_PORT" -le 65535 ]] || exit 2
+          [[ "$DEPLOY_PATH" =~ ^/([a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+$ ]] || exit 2
+          [[ -n "$SSH_PRIVATE_KEY" && -n "$SSH_KNOWN_HOSTS" ]] || exit 2
+          umask 077
+          mkdir -p "$RUNNER_TEMP/raco-ssh"
+          key="$RUNNER_TEMP/raco-ssh/key"
+          known="$RUNNER_TEMP/raco-ssh/known_hosts"
+          trap 'rm -f "$key" "$known"' EXIT
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$known"
+          remote="$DEPLOY_USER@$DEPLOY_HOST"
+          opts=(-i "$key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$known")
+          tar -czf "$RUNNER_TEMP/raco-release.tar.gz" deploy/raco
+          ssh "${opts[@]}" -p "$DEPLOY_PORT" "$remote" "mkdir -p '$DEPLOY_PATH/releases/$COMMIT'"
+          scp "${opts[@]}" -P "$DEPLOY_PORT" "$RUNNER_TEMP/raco-release.tar.gz" "$remote:$DEPLOY_PATH/releases/$COMMIT/release.tar.gz"
+          ssh "${opts[@]}" -p "$DEPLOY_PORT" "$remote" "tar -xzf '$DEPLOY_PATH/releases/$COMMIT/release.tar.gz' -C '$DEPLOY_PATH/releases/$COMMIT' && bash '$DEPLOY_PATH/releases/$COMMIT/deploy/raco/deploy.sh' '$DEPLOY_PATH' 'ghcr.io/${REPOSITORY,,}' '$COMMIT'"
+          echo "Deployment completed for $COMMIT" >> "$GITHUB_STEP_SUMMARY"

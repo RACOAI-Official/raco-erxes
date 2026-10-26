@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -30,9 +31,11 @@ function getFilesFullPaths(
     .filter((x) => x);
 }
 
-export default async function getPluginConfigs(): Promise<any[]> {
+export async function getPluginConfigs(): Promise<unknown[]> {
   await downloadPlugins();
   const directory = path.join(__dirname, '/downloads');
   const files = getFilesFullPaths(directory, (name) => /\.(t|j)s$/.test(name));
-  return await Promise.all(files.map((file) => import(file)));
+  // Subscription bundles are synchronous modules. Node 22 can require both
+  // CommonJS and ESM bundles by filesystem path, including Windows drive paths.
+  return files.map((file): unknown => require(file));
 }

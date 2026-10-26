@@ -16,6 +16,7 @@ on:
 
 jobs:
   sentry-release:
+    if: github.repository_owner == 'erxes'
     name: Create Sentry Release
     runs-on: ubuntu-latest
     steps:

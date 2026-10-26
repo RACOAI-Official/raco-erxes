@@ -1,4 +1,8 @@
-import { DEFAULT_RACO_BRAND_CONFIG, loadRacoBrandConfig } from '../config';
+import {
+  DEFAULT_RACO_BRAND_CONFIG,
+  loadRacoBrandConfig,
+  toOrgWhiteLabelPayload,
+} from '../config';
 
 describe('raco-brand config', () => {
   it('defaults to racoai.io with null emails and logos', () => {
@@ -37,5 +41,12 @@ describe('raco-brand config', () => {
     expect(DEFAULT_RACO_BRAND_CONFIG.blockedUiBrandRemovals.length).toBeGreaterThan(
       0,
     );
+  });
+
+  it('exposes OrgWhiteLabel payload without inventing logos', () => {
+    const payload = toOrgWhiteLabelPayload(loadRacoBrandConfig({}));
+    expect(payload.enabled).toBe(false);
+    expect(payload.orgLogo).toBeNull();
+    expect(payload.orgShortName).toBe('Raco');
   });
 });

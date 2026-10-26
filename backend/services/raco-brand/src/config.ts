@@ -1,4 +1,4 @@
-import type { RacoBrandConfig } from './types';
+import type { RacoBrandConfig, RacoOrgWhiteLabelMapping } from './types';
 
 /**
  * Default Raco brand config.
@@ -108,4 +108,14 @@ export function loadRacoBrandConfig(
         env.RACO_ORG_WHITELABEL_ENABLED === 'true',
     },
   };
+}
+
+/**
+ * Payload aligned with erxes OrgWhiteLabel fields for upsert when rights + assets exist.
+ * Does not invent logo URLs or enable the flag by itself.
+ */
+export function toOrgWhiteLabelPayload(
+  config: RacoBrandConfig,
+): RacoOrgWhiteLabelMapping {
+  return { ...config.orgWhiteLabel };
 }

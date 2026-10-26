@@ -285,6 +285,7 @@ export const mutations = `
   mailMessageRetry(_id: String!): MailDeliveryOutcome
 
   mailDraftSave(_id: String!, subject: String, body: String!): MailDraft
+  frontlineMailComposeDraft(integrationId: String!, customerId: String, to: String!, subject: String!, body: String!, requestId: String!): MailDraft
   mailDraftApprove(_id: String!): MailDeliveryOutcome
   mailDraftRemove(_id: String!): MailDraft
 

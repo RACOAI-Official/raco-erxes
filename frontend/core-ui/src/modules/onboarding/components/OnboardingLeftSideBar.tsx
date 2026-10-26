@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
-import { BackgroundGradientAnimation } from 'erxes-ui';
 import { Logo } from '@/auth/components/Logo';
 import type { OnboardingStepDef } from './onboardingSteps';
 import { OnboardingStepItem } from './OnboardingStepItem';
@@ -48,12 +47,9 @@ export const OnboardingLeftSideBar = ({
 
   return (
     <>
-      <BackgroundGradientAnimation
-        containerClassName="hidden lg:flex"
-        className="gap-8"
-      >
+      <div className="raco-brand-panel hidden lg:flex flex-col gap-8 w-1/3 min-h-dvh p-8">
         <div className="flex flex-none flex-row items-center justify-between">
-          <Logo className="h-8 text-primary-foreground" />
+          <Logo tone="light" className="h-8 w-auto" />
         </div>
 
         <div className="flex flex-1 items-center justify-center px-12">
@@ -69,12 +65,9 @@ export const OnboardingLeftSideBar = ({
             ))}
           </div>
         </div>
-      </BackgroundGradientAnimation>
+      </div>
 
-      <BackgroundGradientAnimation
-        containerClassName="lg:hidden min-h-[220px] w-full overflow-hidden"
-        className="justify-center"
-      >
+      <div className="raco-brand-panel flex lg:hidden min-h-[220px] w-full overflow-hidden justify-center">
         <div className="flex w-full justify-center px-5 py-4 md:px-10">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -99,7 +92,7 @@ export const OnboardingLeftSideBar = ({
             </motion.div>
           </AnimatePresence>
         </div>
-      </BackgroundGradientAnimation>
+      </div>
     </>
   );
 };

@@ -10,16 +10,17 @@
       "cache": true,
       "options": {
         "cwd": "backend/plugins/operation_api",
-        "commands": [
-          "pnpm build"
-        ]
+        "commands": ["pnpm build"]
       },
-      "dependsOn": [
-        "^build",
-        "build:packageJson"
-      ]
+      "dependsOn": ["^build", "build-package-json"]
     },
     "build:packageJson": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec nx run operation_api:build-package-json"
+      }
+    },
+    "build-package-json": {
       "executor": "@nx/js:tsc",
       "options": {
         "main": "backend/plugins/operation_api/dist/src/main.js",
@@ -31,26 +32,21 @@
     },
     "start": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "typecheck",
-        "build"
-      ],
+      "dependsOn": ["typecheck", "build"],
       "options": {
         "cwd": "backend/plugins/operation_api",
-        "command": "NODE_ENV=development node dist/src/main.js"
+        "command": "cross-env NODE_ENV=development node dist/src/main.js"
       }
     },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "backend/plugins/operation_api",
-        "command": "NODE_ENV=development pnpm dev"
+        "command": "cross-env NODE_ENV=development pnpm dev"
       }
     },
     "docker-build": {
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "command": "docker build -f backend/plugins/operation_api/Dockerfile . -t erxes/erxes-next-operation_api"
     },
     "schema:print": {}

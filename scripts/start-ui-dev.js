@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 // scripts/start-dev.js
 require('dotenv').config();
 
@@ -46,9 +47,9 @@ if (codegenRemotes.length) {
   const projects = codegenRemotes.join(',');
   execSync(`nx run-many -t codegen -p ${projects}`, { stdio: 'inherit' });
   watcher = spawn(
-    'npx',
+    process.execPath,
     [
-      'nx',
+      require.resolve('nx/bin/nx.js'),
       'run-many',
       '-t',
       'codegen:watch',

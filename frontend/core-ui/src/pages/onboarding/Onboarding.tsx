@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { motion } from 'framer-motion';
 import { Button, Card, PageContainer } from 'erxes-ui';
 import { IconSun, IconKeyboard } from '@tabler/icons-react';
@@ -25,14 +26,13 @@ export const OnBoarding = () => {
   const features: FeatureProps[] = [
     {
       icon: <IconSun className="h-4 w-4" />,
-      title: 'Revamped UI',
-      description:
-        'Built with ShadCN and Radix UI, delivering a smoother, more accessible interface.',
+      title: 'Your customer workspace',
+      description: 'Keep customers, companies, and your team’s work connected.',
     },
     {
       icon: <IconKeyboard className="h-4 w-4" />,
       title: 'Keyboard Shortcuts',
-      description: 'Navigate erxes with ease using built-in shortcuts.',
+      description: 'Navigate Raco AI with built-in keyboard shortcuts.',
     },
     {
       icon: <IconSun className="h-4 w-4" />,
@@ -64,20 +64,18 @@ export const OnBoarding = () => {
                   Welcome to{' '}
                   {organization?.orgCustomOnboarding
                     ? organization?.orgShortName || 'your organization'
-                    : 'erxes 3.0'}{' '}
-                  - A New Experience Begins!
+                    : 'Raco AI'}{' '}
+                  CRM
                 </h1>
                 <p className="text-muted-foreground">
-                  A Fresh Start with a New UX/UI
+                  Connect AI to your operations.
                 </p>
               </motion.div>
             </Card.Header>
             <Card.Content className="space-y-8">
               <p className="text-center text-muted-foreground">
-                We've completely redesigned erxes from the ground up, bringing a
-                modern, faster, and more intuitive experience. This is just the
-                beginning—the new UX/UI will continue to evolve, with more
-                features and plugins rolling out daily.
+                Raco AI brings your contacts, companies, tasks, and AI-assisted
+                workflows together in a self-hosted CRM built on erxes.
               </p>
 
               <div className="grid gap-6 md:grid-cols-3">
@@ -98,9 +96,8 @@ export const OnBoarding = () => {
                   What to Expect?
                 </h2>
                 <p className="text-center text-muted-foreground">
-                  At launch, only a few plugins will feature the new UI, but we
-                  are actively working to upgrade the entire platform. Every
-                  day, you'll see new improvements.
+                  Start with your contacts, organize your projects, and build
+                  reusable automations around the way your team works.
                 </p>
               </div>
 
@@ -109,7 +106,7 @@ export const OnBoarding = () => {
                   Your Feedback Shapes{' '}
                   {organization?.orgCustomOnboarding
                     ? organization?.orgShortName || 'your organization'
-                    : 'erxes 3.0'}
+                    : 'Raco AI'}
                 </h2>
                 <p className="text-center text-muted-foreground">
                   Your input is essential! Share your thoughts and help us
@@ -120,20 +117,19 @@ export const OnBoarding = () => {
                     variant="default"
                     onClick={() =>
                       window.open(
-                        'https://discord.gg/Mqvc9kDq',
+                        'https://racoai.io/contact',
                         '_blank',
                         'noopener,noreferrer',
                       )
                     }
                   >
-                    Join the Community
+                    Contact Raco AI
                   </Button>
                 </div>
               </div>
 
               <p className="text-sm text-center text-muted-foreground italic">
-                We've been working tirelessly for the last a month to make this
-                happen—now it's your turn to explore!
+                Custom software. Applied AI. Built around your team.
               </p>
             </Card.Content>
           </Card>

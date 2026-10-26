@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import mongoose from 'mongoose';
 
 const { MONGO_URL = 'mongodb://127.0.0.1:27017/erxes?directConnection=true' } =
@@ -9,19 +10,16 @@ export const mongooseConnectionOptions: mongoose.ConnectOptions = {
 
 mongoose.connection
   .on('connected', () => {
-    console.log(`Connected to the database: ${MONGO_URL}`);
+    console.info('MongoDB connected.');
   })
-  .on('disconnected', (...props) => {
-    console.log(`Disconnected from the database: ${MONGO_URL}`);
-
-    process.exit(1);
+  .on('disconnected', () => {
+    // A disconnect may be temporary, or part of an intentional shutdown.
+    // Let the driver reconnect and let shutdown handlers finish their work.
+    console.warn('MongoDB disconnected.');
   })
-  .on('error', (error) => {
-    console.error(`Database connection error: ${MONGO_URL} ${error}`);
-
-    process.exit(1);
-  })
-  .on('close', () => {});
+  .on('error', (error: Error) => {
+    console.error('MongoDB connection error:', error.name);
+  });
 
 export async function connect(): Promise<mongoose.Connection> {
   if (!MONGO_URL) {
@@ -32,11 +30,14 @@ export async function connect(): Promise<mongoose.Connection> {
   return mongoose.connection;
 }
 
-export async function closeMongooose() {
+export async function closeMongooose(): Promise<void> {
   try {
     await mongoose.connection.close();
-    console.log('Mongoose connection disconnected ');
-  } catch (e) {
-    console.error(e);
+    console.info('MongoDB connection closed.');
+  } catch (error: unknown) {
+    console.error(
+      'Could not close MongoDB connection:',
+      error instanceof Error ? error.name : 'UnknownError',
+    );
   }
 }

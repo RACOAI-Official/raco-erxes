@@ -61,6 +61,37 @@
 
 ## Current Capabilities
 
+- `frontlineMailComposeDraft` creates a contact-linked email conversation and
+  pending draft without delivery; it requires send permission and inbox access.
+  Draft automation config `mode: compose` accepts inbox, recipient, subject and
+  content bindings. Reply workflows continue to use the existing draft action.
+  Only authenticated `mailDraftApprove` sends these drafts.
+
+- Operator-managed Mailcow inboxes use native kind `mail` with creation data
+  `{provider: 'mailcow'}`. Server configuration pins `MAILCOW_SUBDOMAIN` and
+  `MAILCOW_ADDRESS`; SMTP is selected only for that tenant and exact sender,
+  with mandatory TLS. Secrets stay in private environment variables, never
+  integration details. Existing Cloudflare mail remains on its own transport.
+
+- Mailcow inbound bridge: `src/modules/integrations/mail/mailcow/bridge.py`
+  reads IMAPS without changing flags and posts to the existing signed mail
+  webhook. It uses a persistent UID checkpoint, starts with new mail only, and
+  requires a mailbox credential plus a derived tenant key. Exact configured
+  senders can reply through the Mailcow SMTP transport; see its README.
+
+- OpenWA composition: authenticated `frontlineOpenwaCompose` checks send permission
+  and inbox visibility, sends to the selected Core contact's international phone,
+  and records canonical inbox history. `outbound.ts` supplies shared composition
+  for the `frontline:inbox.openwaMessages.create` automation action. The action
+  uses the trigger's contact/conversation when no recipient binding is supplied.
+
+- OpenWA v0.25 webhooks: `POST /openwa/receive` (gateway
+  `/pl:frontline/openwa/receive`) verifies HMAC-SHA256 over the captured raw body,
+  pins the configured tenant/session/integration, and receives direct incoming
+  WhatsApp messages. `src/modules/integrations/openwa/` owns normalization,
+  Core contact synchronization, canonical inbox storage, text replies, and the
+  dedicated `frontline:inbox.openwaMessages` automation trigger. See its README.
+
 - Telegram bot setup and webhook status; private chats, groups, channels and
   forum topics; text, files, media, polls, edits, observed reactions and visible
   fallbacks. Long replies split into complete ordered text chunks, with caption
@@ -1305,6 +1336,27 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
   tenant, integration and chat, with topic identity included where applicable.
 
 ## Local Invariants
+
+- Outgoing OpenWA requests use a stable request ID as the provider's
+  `Idempotency-Key` and as the CRM message ID seed. A retry must retain that ID;
+  a changed recipient/body with an already completed ID is rejected. Do not
+  record `sent` until OpenWA returns a successful response with a message ID.
+  `sent` means accepted by the WhatsApp session, not recipient delivery/read.
+
+- OpenWA credentials and webhook secret exist only in server environment values.
+  Ignore own messages, groups, statuses, and broadcasts before contact creation.
+  Never interpret a WhatsApp privacy ID as a telephone number. Match existing
+  contacts by phone; fill missing fields without overwriting curated names.
+- OpenWA message/conversation IDs are deterministic and integration-scoped.
+  Use a tenant/chat Redis lease and retain the automation trigger job ID so
+  redeliveries cannot create another message or automation enrolment. Acknowledge
+  only after queueing succeeds; failed processing returns 503 for provider retry.
+  Text replies validate the stored chat mapping and active integration before
+  calling the configured OpenWA server. Attachments/polls are rejected explicitly.
+- Compiled Frontline startup selects its existing `.js` subscription bundle;
+  source development falls back to `.ts`.
+  `FRONTLINE_UI_ENTRY_URL`, when configured, supplies this plugin process's
+  public `UI_ENTRY_URL` service-discovery value without changing other plugins.
 
 - Set property handlers pass `targetActionId: action.targetActionId` to
   `getSetPropertySelector`, so a Manage properties action targeting an earlier

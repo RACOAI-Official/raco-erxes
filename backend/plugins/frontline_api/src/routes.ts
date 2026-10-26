@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { openwaRouter } from './modules/integrations/openwa/routes';
 import { router as facebookRouter } from './modules/integrations/facebook/routes';
 import { router as instagramRouter } from './modules/integrations/instagram/routes';
 import { router as telegramRouter } from './modules/integrations/telegram/routes';
@@ -8,6 +9,7 @@ import { router as callProRouter } from './modules/integrations/callpro/routes';
 import { isCallProEnabled } from './modules/integrations/callpro/config';
 
 export const router: Router = Router();
+router.use('/openwa', openwaRouter);
 
 router.use('/facebook', facebookRouter);
 router.use('/instagram', instagramRouter);

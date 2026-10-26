@@ -1,5 +1,13 @@
 import { lazy } from 'react';
 import {
+  OpenwaActionForm,
+  OpenwaActionSummary,
+} from '@/integrations/openwa/OpenwaAction';
+import {
+  OpenwaTriggerForm,
+  OpenwaTriggerSummary,
+} from '@/integrations/openwa/OpenwaTrigger';
+import {
   AutomationRemoteEntryProps,
   AutomationRemoteEntryTypes,
   AutomationRemoteEntryWrapper,
@@ -32,7 +40,7 @@ export const InboxRemoteEntry = (props: AutomationRemoteEntryProps) => {
         triggerForm: renderTriggerForm,
         triggerConfigContent: renderTriggerConfigContent,
         actionForm: renderActionForm,
-        actionNodeConfiguration: InboxMessageActionConfig,
+        actionNodeConfiguration: renderActionConfig,
         historyName: AutomationHistoryName,
         historyActionResult: AutomationHistoryResult,
       }}
@@ -43,6 +51,9 @@ export const InboxRemoteEntry = (props: AutomationRemoteEntryProps) => {
 function renderTriggerForm(props: AutomationRemoteEntryTypes['triggerForm']) {
   const triggerType = props.activeTrigger?.type || '';
   const [, , collectionType] = splitAutomationNodeType(triggerType);
+
+  if (collectionType === 'openwaMessages')
+    return <OpenwaTriggerForm {...props} />;
 
   if (collectionType === 'messages') {
     return <InboxMessageTriggerForm {...props} />;
@@ -56,6 +67,8 @@ function renderTriggerConfigContent(
 ) {
   const [, , collectionType] = splitAutomationNodeType(props.type || '');
 
+  if (collectionType === 'openwaMessages') return <OpenwaTriggerSummary />;
+
   if (collectionType === 'messages') {
     return <MessengerMessageTriggerNodeContent {...props} />;
   }
@@ -64,5 +77,21 @@ function renderTriggerConfigContent(
 }
 
 function renderActionForm(props: AutomationRemoteEntryTypes['actionForm']) {
+  const [, , collectionType] = splitAutomationNodeType(
+    props.currentAction.type || '',
+  );
+  if (collectionType === 'openwaMessages')
+    return <OpenwaActionForm {...props} />;
   return <InboxMessageActionForm {...props} />;
+}
+
+function renderActionConfig(
+  props: AutomationRemoteEntryTypes['actionNodeConfiguration'],
+) {
+  const [, , collectionType] = splitAutomationNodeType(
+    props.actionData.type || '',
+  );
+  if (collectionType === 'openwaMessages')
+    return <OpenwaActionSummary {...props} />;
+  return <InboxMessageActionConfig {...props} />;
 }

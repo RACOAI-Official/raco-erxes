@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { Button, useScopedHotkeys } from 'erxes-ui';
 
 import type { OnboardingStepDef } from './onboardingSteps';
@@ -30,7 +31,7 @@ export const WelcomeSection = ({
   const organization = useAtomValue(currentOrganizationState);
   const brandName = organization?.orgCustomOnboarding
     ? organization?.orgShortName
-    : 'erxes';
+    : 'Raco AI';
 
   const milestoneRows = steps.slice(1);
 

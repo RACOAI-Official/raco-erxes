@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { Avatar, Button, DropdownMenu, readImage } from 'erxes-ui';
 
 import { AppPath } from '@/types/paths/AppPath';
@@ -56,6 +57,11 @@ export const CoreTabUserMenu = () => {
         <DropdownMenu.Separator />
         <ThemeSelector />
         <SelectLanguages />
+        <DropdownMenu.Item asChild>
+          <a href="/assets/raco-source.tar.gz" download>
+            Raco AI source and license
+          </a>
+        </DropdownMenu.Item>
         <DropdownMenu.Separator />
         <DropdownMenu.Item
           className="h-7 py-0 text-sm"

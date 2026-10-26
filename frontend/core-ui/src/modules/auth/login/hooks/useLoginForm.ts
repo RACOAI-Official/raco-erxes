@@ -1,9 +1,8 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-
-// import { PASSWORD_REGEX } from 'erxes-ui';
 
 export const authValidationSchema = z
   .object({
@@ -16,6 +15,7 @@ export type FormType = z.infer<typeof authValidationSchema>;
 
 export const useSignInUpForm = () => {
   const form = useForm<FormType>({
+    defaultValues: { email: '', password: '' },
     resolver: zodResolver(authValidationSchema),
   });
 

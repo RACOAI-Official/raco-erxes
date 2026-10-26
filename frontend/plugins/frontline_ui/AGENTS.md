@@ -88,6 +88,24 @@
 
 ## Current Capabilities
 
+- Email drafts show a recipient/subject confirmation before approval sends them.
+  Manual email composition/replies also confirm through `useMailSendMail`.
+  Compose-mode draft automation settings retain inbox/contact/recipient bindings.
+
+- OpenWA integration details include a native contact selector and text composer
+  calling `frontlineOpenwaCompose`, with validation, feedback and navigation to
+  the stored conversation. The OpenWA automation send action has an editable
+  text body, optional recipient binding, and a node summary. These are owned by
+  `OpenwaCompose.tsx` and `OpenwaAction.tsx` in `integrations/openwa`.
+
+- `openwa-messenger` renders WhatsApp messages through the canonical inbox and
+  supports text replies. The integration catalogue/detail show the server-managed
+  OpenWA connection and link to the local OpenWA dashboard for phone pairing.
+  `src/modules/integrations/openwa/` owns its English fallback translations and
+  the configuration/summary for the separate OpenWA message automation trigger.
+  File attachment controls are hidden for outgoing OpenWA text messages; internal
+  notes keep normal file controls.
+
 - AI knowledge source selector (`widgets/automations/modules/knowledgebase`):
   a topic/category tree above the article list. Checking a topic or category
   sends `config.topicIds` / `config.categoryIds` (hand-picked articles move to
@@ -624,7 +642,7 @@ owns the setup form and connection actions.
 | App sidebar               | `frontend/plugins/frontline_ui/src/Sidebar.tsx`                                                                                                   | `FrontlineSidebar` (app sidebar) and `FrontlineSidebarFooter` (Settings link), rendered by the `./frontline` entry through `AppLayout`          |
 | Host registration         | `src/config.tsx`                                                                                                                                  | `CONFIG` — navigation, settings, widgets, property inputs, routes, and Module Federation exposes                                                |
 | Federation                | `module-federation.config.ts`                                                                                                                     | Remote name `frontline_ui` and its exposes                                                                                                      |
-| GraphQL codegen           | `codegen.ts`                                                                                                           | Generates `src/gql/` (gitignored) from the composed gateway schema                                                 |
+| GraphQL codegen           | `codegen.ts`                                                                                                                                      | Generates `src/gql/` (gitignored) from the composed gateway schema                                                                              |
 | Routes                    | `src/modules/FrontlineMain.tsx`, `src/pages/`                                                                                                     | Routed pages for inbox, ticket, forms, call, channels                                                                                           |
 | Navigation groups         | `src/modules/FrontlineSubGroups.tsx`                                                                                                              | Route-aware sidebar sub-groups for every frontline page                                                                                         |
 | Report navigation         | `src/modules/report/constants/reportSections.ts`                                                                                                  | Report board paths, labels, icons and path matching shared by `ReportIndexPage`, which renders the boards as header tabs                        |
@@ -988,6 +1006,15 @@ to, bouncedRecipients, retryable, canRetry }` for its delivery state;
   state and deliberately not persisted.
 
 ## Local Invariants
+
+- The OpenWA composer retains its request ID when retrying a failed send and
+  resets it after confirmed success. Its mutation and the automation action use
+  Core contacts, not raw phone destinations supplied by browser payloads.
+
+- OpenWA API keys and webhook signing secrets must never enter frontend code or
+  GraphQL/UI payloads. OpenWA messages use the native inbox subscription/cache
+  flow. Its separate trigger type is `frontline:inbox.openwaMessages`; do not
+  change the existing messenger-widget trigger semantics.
 
 - Customer media is recognised by its URL (`isUnverifiedAttachment` in
   `ticket/hooks/useUnverifiedAttachments.ts`): uploads here are storage keys
@@ -2483,6 +2510,7 @@ null }`, fall back to the route pipeline and skip without one; never pass
   `type` enum, not a discriminated union, so its derived types index the fields
   directly; `Extract<..., { type: ... }>` on it collapses to `never`.
 - `Sheet.Header` is a fixed 40px row. A header with a visible second line (subtitle, record number, description) adds `h-auto py-2` so it sizes to its content; detail-page title rows are `h-10`, level with `PageHeader`.
+- Every in-app `Link`/`navigate` target starts with `/frontline/…`. A relative `to="frontline/tickets…"` resolves against the current route, so each click appends another `frontline/tickets` segment (`/frontline/tickets/frontline/tickets/…`). The tickets sidebar channel rows (`TicketNavigations`) link to `/frontline/tickets?channelId=…&pipelineId=…`.
 
 ## Validation
 

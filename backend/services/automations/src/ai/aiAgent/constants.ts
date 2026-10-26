@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 export const AI_AGENT_SUPPORTED_PROVIDERS = [
   'cloudflare-ai-gateway',
   'grok',
@@ -6,14 +7,14 @@ export const AI_AGENT_SUPPORTED_PROVIDERS = [
   'openai',
 ] as const;
 
-export const AI_AGENT_DEFAULT_PROVIDER = 'cloudflare-ai-gateway';
+export const AI_AGENT_DEFAULT_PROVIDER = 'openai';
 
 export const AI_AGENT_PROVIDER_DEFAULT_MODELS = {
   'cloudflare-ai-gateway': 'openai/gpt-5-mini',
   grok: 'grok-4.3',
   kimi: 'kimi-k2.5',
   'kimi-code': 'kimi-for-coding',
-  openai: 'gpt-5-mini',
+  openai: 'qwen3',
 } as const;
 
 export const AI_AGENT_SUPPORTED_CONTEXT_FILE_EXTENSIONS = [

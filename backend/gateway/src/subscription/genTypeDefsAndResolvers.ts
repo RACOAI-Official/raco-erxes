@@ -1,8 +1,9 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-import getPluginConfigs from "./plugins/getPluginConfigs";
+import { getPluginConfigs } from "./plugins/getPluginConfigs";
 import genTypeDefs from "./genTypeDefs";
 import genResolvers from "./resolvers/genResolvers";
 import { DocumentNode } from "graphql";

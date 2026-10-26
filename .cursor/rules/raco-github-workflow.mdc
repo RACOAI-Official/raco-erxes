@@ -1,0 +1,11 @@
+---
+description: Canonical RacoAI GitHub repository and separate task branches
+alwaysApply: true
+---
+
+Use https://github.com/RACOAI-Official/raco-erxes.git as origin.
+Follow the repository and branch workflow in the root AGENTS.md.
+Create a separate codex/<task> branch from current origin/main for each update.
+Push to origin on that task branch. Do not push directly to main.
+Do not push to the previous raco remote unless explicitly requested.
+Merge pull requests only when the user explicitly asks.

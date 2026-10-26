@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 export type TAiAgentKind = {
   type: string;
   label: string;
@@ -7,16 +8,16 @@ export type TAiAgentKind = {
 
 export const AI_AGENT_KINDS: TAiAgentKind[] = [
   {
+    type: 'openai',
+    label: 'Raco LLM',
+    description: 'Use the server-configured Raco LLM and optional Gemini fallback.',
+    image: 'raco-icon.svg',
+  },
+  {
     type: 'cloudflare-ai-gateway',
     label: 'Cloudflare AI Gateway',
     description: 'Use the platform-managed AI Gateway or override it.',
     image: 'cloudflare.webp',
-  },
-  {
-    type: 'openai',
-    label: 'OpenAI Direct',
-    description: 'Connect OpenAI with organization-owned credentials.',
-    image: 'openai.webp',
   },
   {
     type: 'kimi',

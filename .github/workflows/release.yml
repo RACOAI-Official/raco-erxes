@@ -12,6 +12,7 @@ on:
 
 jobs:
   tag-docker-images:
+    if: github.repository_owner == 'erxes'
     name: Tag ${{ matrix.image }}
     runs-on: ubuntu-latest
     strategy:

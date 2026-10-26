@@ -1,0 +1,56 @@
+# Source-only SaaS overlay. Does not change the default self-hosted installation.
+# Merge after deploy/raco/compose.yaml with a NEW project name and private env file.
+x-saas: &saas
+  NODE_ENV: production
+  VERSION: saas
+  RACO_SAAS_ENABLED: 'true'
+  RACO_SAAS_DOMAIN: xos.racoai.io
+  RACO_SAAS_CORE_URL: http://plugin-core-api:3300
+  ENABLED_PLUGINS: operation,frontline
+  ENABLED_SERVICES: automations
+  DB_NAME: erxes_<organizationId>
+  DOMAIN: https://<subdomain>.xos.racoai.io
+  LOCAL_UPLOADS_DIR: /app/uploads
+services:
+  plugin-core-api:
+    environment:
+      <<: *saas
+      PORT: '3300'
+  plugin-operation-api:
+    environment:
+      <<: *saas
+      PORT: '3307'
+      UI_ENTRY_URL: https://xos.racoai.io/plugins/operation/remoteEntry.js
+  automations-service:
+    environment:
+      <<: *saas
+      PORT: '3302'
+  gateway:
+    environment:
+      <<: *saas
+      PORT: '4000'
+    depends_on:
+      plugin-frontline-api: { condition: service_healthy }
+  plugin-frontline-api:
+    image: ${IMAGE_NAMESPACE:?Set IMAGE_NAMESPACE}-backend:${IMAGE_TAG:?Set IMAGE_TAG}
+    restart: unless-stopped
+    init: true
+    env_file: ${RACO_ENV_FILE:?Set RACO_ENV_FILE}
+    working_dir: /app/backend/plugins/frontline_api
+    command: [node, dist/src/main.js]
+    environment:
+      <<: *saas
+      PORT: '3304'
+      FRONTLINE_UI_ENTRY_URL: https://xos.racoai.io/plugins/frontline/remoteEntry.js
+    volumes: [uploads:/app/uploads]
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3304/health').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
+  web:
+    environment:
+      RACO_SAAS_DOMAIN: xos.racoai.io
+    volumes:
+      - ./saas/nginx.conf:/etc/nginx/conf.d/default.conf:ro

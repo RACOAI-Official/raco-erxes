@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import * as dotenv from 'dotenv';
 
 import { spawn, ChildProcess, execSync } from 'child_process';
@@ -12,6 +13,7 @@ import {
   supergraphPath,
 } from '~/apollo-router/paths';
 import supergraphCompose from '~/apollo-router/supergraph-compose';
+import { downloadWindowsRouter } from './windows-router';
 
 dotenv.config();
 
@@ -159,6 +161,11 @@ const downloadRouter = async () => {
   }
 
   const version = 'v1.59.2';
+  if (process.platform === 'win32') {
+    await downloadWindowsRouter(version, dirTempPath, routerPath);
+    return routerPath;
+  }
+
   const downloadCommand = `(export VERSION=${version}; curl -sSL https://router.apollo.dev/download/nix/${version} | sh)`;
   try {
     execSync(`cd ${dirTempPath} && ${downloadCommand}`);

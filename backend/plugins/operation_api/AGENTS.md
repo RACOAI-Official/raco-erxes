@@ -6,7 +6,7 @@
 - **Project:** `operation_api`
 - **Layer:** `Backend API`
 - **Path:** `backend/plugins/operation_api`
-- **Last synchronized:** `2026-10-17`
+- **Last synchronized:** `2026-10-21`
 
 ## Scope
 
@@ -126,6 +126,14 @@ propertiesData? } })`
   GraphQL type does not expose it; import/export read it.
 
 ## Local Invariants
+
+- Nx `serve` and `start` use the workspace `cross-env` command to set
+  `NODE_ENV=development` on Windows and Unix hosts. Start the enabled backend
+  set with `pnpm dev:apis` from the repository root.
+- The TypeScript packaging target is `build-package-json` so Nx temporary
+  paths are valid on Windows. `build:packageJson` remains a compatibility alias.
+- The subscription asset extension follows the running entry file (`.ts` for
+  source execution, `.js` for compiled execution), independent of `NODE_ENV`.
 
 - Set property handlers pass `targetActionId: action.targetActionId` to
   `getSetPropertySelector`, so a Manage properties action targeting an earlier

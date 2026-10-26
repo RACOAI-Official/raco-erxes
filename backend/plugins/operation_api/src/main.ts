@@ -1,3 +1,5 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
+import { extname, resolve } from 'node:path';
 import { redis, startPlugin } from 'erxes-api-shared/utils';
 import { Router } from 'express';
 import { typeDefs } from '~/apollo/typeDefs';
@@ -42,10 +44,10 @@ startPlugin({
     resolvers,
   }),
   hasSubscriptions: true,
-  subscriptionPluginPath: require('path').resolve(
+  subscriptionPluginPath: resolve(
     __dirname,
     'apollo',
-    process.env.NODE_ENV === 'production'
+    extname(__filename) === '.js'
       ? 'subscription.js'
       : 'subscription.ts',
   ),

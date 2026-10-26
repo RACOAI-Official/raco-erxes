@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { racoSaasRouter } from './modules/raco-saas/routes';
 import { router as broadcastRoutes } from '~/modules/broadcast/routes';
 import { router as documentRoutes } from '~/modules/documents/routes';
 import { router as organizationRoutes } from '~/modules/organization/routes';
@@ -9,6 +10,7 @@ import { router as oauthRoutes } from '~/modules/auth/routes/oauth/routes';
 import { router as templateRoutes } from '~/modules/template/routes';
 
 const router: Router = Router();
+router.use('/saas', racoSaasRouter);
 
 router.use(organizationRoutes);
 router.use(fileRoutes);

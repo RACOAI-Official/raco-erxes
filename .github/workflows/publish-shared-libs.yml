@@ -64,6 +64,7 @@ permissions:
 
 jobs:
   publish-shared-libs:
+    if: github.repository_owner == 'erxes'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

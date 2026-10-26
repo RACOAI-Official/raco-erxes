@@ -1,0 +1,84 @@
+name: raco-ai
+x-backend: &backend
+  image: ${IMAGE_NAMESPACE:?Set IMAGE_NAMESPACE}-backend:${IMAGE_TAG:?Set IMAGE_TAG}
+  restart: unless-stopped
+  init: true
+  env_file: ${RACO_ENV_FILE:?Set RACO_ENV_FILE}
+  environment: &environment
+    NODE_ENV: production
+    VERSION: os
+    ENABLED_PLUGINS: operation
+    ENABLED_SERVICES: automations
+    LOCAL_UPLOADS_DIR: /app/uploads
+  volumes:
+    - uploads:/app/uploads
+  healthcheck:
+    test:
+      [
+        CMD,
+        node,
+        -e,
+        "const s=require('net').connect(Number(process.env.PORT),'127.0.0.1');s.on('connect',()=>{s.end();process.exit(0)});s.on('error',()=>process.exit(1));s.setTimeout(3000,()=>process.exit(1));",
+      ]
+    interval: 15s
+    timeout: 5s
+    retries: 12
+    start_period: 120s
+services:
+  plugin-core-api:
+    <<: *backend
+    working_dir: /app/backend/core-api
+    command: [node, dist/src/main.js]
+    environment:
+      <<: *environment
+      PORT: '3300'
+  plugin-operation-api:
+    <<: *backend
+    working_dir: /app/backend/plugins/operation_api
+    command: [node, dist/src/main.js]
+    environment:
+      <<: *environment
+      PORT: '3307'
+      UI_ENTRY_URL: ${DOMAIN:?Set DOMAIN}/plugins/operation/remoteEntry.js
+  automations-service:
+    <<: *backend
+    working_dir: /app/backend/services/automations
+    command: [node, dist/src/main.js]
+    environment:
+      <<: *environment
+      PORT: '3302'
+  gateway:
+    <<: *backend
+    working_dir: /app/backend/gateway
+    command: [node, dist/src/main.js]
+    environment:
+      <<: *environment
+      PORT: '4000'
+    depends_on:
+      plugin-core-api: { condition: service_healthy }
+      plugin-operation-api: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:4000/health',{signal:AbortSignal.timeout(4000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
+  web:
+    image: ${IMAGE_NAMESPACE:?Set IMAGE_NAMESPACE}-web:${IMAGE_TAG:?Set IMAGE_TAG}
+    restart: unless-stopped
+    ports: ['127.0.0.1:${RACO_HTTP_PORT:-8080}:8080']
+    depends_on:
+      gateway: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8080/healthz]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+volumes:
+  uploads:

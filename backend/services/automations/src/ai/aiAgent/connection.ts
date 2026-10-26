@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { z } from 'zod';
 import {
   AI_AGENT_DEFAULTS,
@@ -63,12 +64,7 @@ export const openAiConnectionSchema = z.object({
         .max(AI_AGENT_LIMITS.maxSecretChars)
         .optional()
         .default(''),
-      baseUrl: z
-        .string()
-        .trim()
-        .url()
-        .optional()
-        .default(AI_AGENT_DEFAULTS.openAiBaseUrl),
+      baseUrl: optionalUrlSchema.optional().default(''),
       headers: headersSchema,
     })
     .default({}),
@@ -164,8 +160,8 @@ export const aiAgentConnectionSchema = z
     openAiConnectionSchema,
   ])
   .default({
-    provider: 'cloudflare-ai-gateway',
-    model: AI_AGENT_PROVIDER_DEFAULT_MODELS['cloudflare-ai-gateway'],
+    provider: 'openai',
+    model: AI_AGENT_PROVIDER_DEFAULT_MODELS.openai,
     config: {},
   });
 

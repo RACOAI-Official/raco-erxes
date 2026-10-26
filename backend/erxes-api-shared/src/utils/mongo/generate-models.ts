@@ -1,5 +1,6 @@
 import { createScopedEventHandlers } from '../../core-modules/common/eventHandlers/generateEventHandlers';
 import mongoose, { Connection } from 'mongoose';
+import { assertRacoTenantAccess, racoTenantDatabaseName } from '../saas/raco-access';
 import {
   coreModelOrganizations,
   getSaasCoreConnection,
@@ -74,8 +75,12 @@ export const createGenerateModels = <IModels>(
         );
       }
 
+      assertRacoTenantAccess(organization);
+
       const DB_NAME = getEnv({ name: 'DB_NAME' });
-      const GE_MONGO_URL = (DB_NAME || 'erxes_<organizationId>').replace(
+      const GE_MONGO_URL = organization.racoManaged
+        ? racoTenantDatabaseName(String(organization._id), DB_NAME || 'erxes_<organizationId>')
+        : (DB_NAME || 'erxes_<organizationId>').replace(
         '<organizationId>',
         organization._id,
       );

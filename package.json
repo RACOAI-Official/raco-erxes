@@ -4,6 +4,8 @@
   "license": "MIT",
   "scripts": {
     "dev:core-api": "npx nx run-many -t serve -p core-api gateway",
+    "source:raco": "node scripts/package-raco-source.cjs",
+    "start:raco": "node scripts/start-raco-local.cjs",
     "dev:apis": "dotenv -e .env -- node scripts/start-api-dev.js",
     "dev:uis": "dotenv -e .env -- node scripts/start-ui-dev.js",
     "create-plugin": "node scripts/create-plugin.js",
@@ -240,6 +242,7 @@
     "babel-jest": "^29.7.0",
     "chokidar-cli": "^3.0.0",
     "core-js": "^3.36.1",
+    "cross-env": "7",
     "dotenv-cli": "^8.0.0",
     "enquirer": "^2.4.1",
     "esbuild": "^0.19.2",

@@ -78,6 +78,7 @@ export const queries = `
 `;
 
 export const mutations = `
+  frontlineOpenwaCompose(customerId: String!, text: String!, requestId: String!): ConversationMessage
   conversationMessageReact(
     conversationId: String!
     messageId: String!

@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import {
   AI_AGENT_PROVIDER_DEFAULT_BASE_URLS,
   AI_AGENT_PROVIDER_DEFAULT_MODELS,
@@ -32,11 +33,7 @@ export const openAiConnectionSchema = z.object({
   model: z.string().trim().min(1, 'Model is required'),
   config: z.object({
     apiKey: z.string().optional().default(''),
-    baseUrl: z
-      .string()
-      .trim()
-      .url('Enter a valid base URL')
-      .default(AI_AGENT_PROVIDER_DEFAULT_BASE_URLS.openai),
+    baseUrl: optionalUrlSchema.optional().default(''),
     headers: headersSchema,
   }),
 });
@@ -116,7 +113,7 @@ type TOpenAiCompatibleConnection =
 type TOpenAiCompatibleConnectionConfig = TOpenAiCompatibleConnection['config'];
 
 export const buildDefaultAiAgentConnection = (
-  provider: TAiAgentProvider = 'cloudflare-ai-gateway',
+  provider: TAiAgentProvider = 'openai',
 ): TAiAgentConnection => {
   if (
     provider === 'openai' ||
@@ -157,7 +154,7 @@ export const normalizeAiAgentConnection = (
     detailConnection?.provider as TAiAgentProvider
   ]
     ? (detailConnection?.provider as TAiAgentProvider)
-    : 'cloudflare-ai-gateway';
+    : 'openai';
   const defaults = buildDefaultAiAgentConnection(provider);
   const detailConfig = detailConnection?.config || {};
 

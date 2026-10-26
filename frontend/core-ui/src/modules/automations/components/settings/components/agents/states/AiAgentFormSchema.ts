@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { z } from 'zod';
 import {
   aiAgentConnectionSchema,
@@ -109,6 +110,10 @@ export const buildAiAgentFormSchema = ({
   baseAiAgentFormSchema.superRefine((value, ctx) => {
     if (
       requireApiKey &&
+      !(
+        value.connection.provider === 'openai' &&
+        !value.connection.config.baseUrl?.trim()
+      ) &&
       AI_AGENT_PROVIDERS_REQUIRING_API_KEY.includes(
         value.connection.provider,
       ) &&

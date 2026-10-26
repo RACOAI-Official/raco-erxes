@@ -16,6 +16,13 @@ const saasCronLastExecutedDateSchema = new mongoose.Schema(
 );
 
 export const saasOrganizationsSchema = new mongoose.Schema({
+  racoManaged: Boolean,
+  racoStatus: { type: String, enum: ['provisioning', 'trialing', 'active', 'suspended'] },
+  racoTrialEndsAt: Date,
+  racoPaidUntil: Date,
+  racoPlanId: String,
+  racoSignupId: String,
+  racoAppliedPayments: { type: [String], default: undefined },
   name: { type: String },
   logo: { type: String },
   icon: { type: String },

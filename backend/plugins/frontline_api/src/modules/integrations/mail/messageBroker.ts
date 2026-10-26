@@ -1,4 +1,5 @@
 import { generateModels } from '~/connectionResolvers';
+import { readMailcowConfig } from '@/integrations/mail/mailcow/config';
 import { withErrorHandling } from '../../../shared/utils';
 import { MAIL_HEALTH_STATUSES } from '@/integrations/mail/constants';
 import { allocateMailAddress } from '@/integrations/mail/utils/allocate';
@@ -34,13 +35,17 @@ export const mailCreateIntegration = withErrorHandling(
 
     const inbox = await models.Integrations.findOne({ _id: integrationId });
 
-    const address = await allocateMailAddress(
+    const mailcow = parsed.provider === 'mailcow' ? readMailcowConfig(subdomain) : null;
+    if (parsed.provider === 'mailcow' && !mailcow) {
+      throw new Error('Configure the tenant Mailcow SMTP mailbox before creating this inbox');
+    }
+    const address = mailcow?.address ?? await allocateMailAddress(
       models,
       subdomain,
       inbox?.name || 'inbox',
     );
 
-    await assertSendableIntegration(subdomain);
+    if (!mailcow) await assertSendableIntegration(subdomain);
 
     return models.MailIntegrations.create({
       inboxId: integrationId,

@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 import { handleTrigger } from '../executions/handleTrigger';
 import type { Job } from 'bullmq';
 import { debugError } from '../debugger';
@@ -22,13 +23,11 @@ type ITriggerJobData = IJobData<ITriggerData>;
 export const triggerHandlerWorker = async (job: Job<ITriggerJobData>) => {
   const { subdomain, data } = job?.data ?? {};
 
-  console.info(
-    `Trigger worker received data: ${JSON.stringify({ subdomain, data })}`,
-  );
   try {
     await handleTrigger(subdomain, data);
-  } catch (error: any) {
-    debugError(`Error processing job ${job.id}: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    debugError(`Error processing job ${job.id}: ${message}`);
     // Error is logged but not thrown to prevent job retries
   }
 };

@@ -1,0 +1,5 @@
+# Merge with the existing OpenWA docker-compose.dev.yml for local CRM delivery.
+services:
+  openwa:
+    environment:
+      SSRF_ALLOWED_HOSTS: host.docker.internal

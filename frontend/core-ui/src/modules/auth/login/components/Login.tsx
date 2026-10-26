@@ -2,15 +2,19 @@ import { Tabs } from 'erxes-ui';
 import { CredentialLoginForm } from '@/auth/login/components/CredentialLoginForm';
 import { MagicLinkLoginForm } from '@/auth/login/components/MagicLinkLoginForm';
 import { useState } from 'react';
-import { useVersion } from 'ui-modules';
+import { useVersion, currentOrganizationState } from 'ui-modules';
+import { useAtomValue } from 'jotai';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 export const Login = () => {
   const { t } = useTranslation('common', { keyPrefix: 'auth' });
   const isOS = useVersion();
+  const organization = useAtomValue(currentOrganizationState);
   const [value, setValue] = useState<string>(
-    isOS ? 'credential' : 'magic-link',
+    isOS || organization?.racoManaged ? 'credential' : 'magic-link',
   );
+
+  if (organization?.racoManaged) return <CredentialLoginForm />;
 
   return (
     <>

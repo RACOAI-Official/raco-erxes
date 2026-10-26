@@ -16,6 +16,7 @@ on:
 
 jobs:
   help-center:
+    if: github.repository_owner == 'erxes'
     runs-on: ubuntu-latest
 
     steps:

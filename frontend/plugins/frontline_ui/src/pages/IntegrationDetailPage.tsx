@@ -1,4 +1,5 @@
 import { useTelegramTranslation } from '@/integrations/telegram/translations';
+import { useOpenwaTranslation } from '@/integrations/openwa/translations';
 import { IntegrationLogo } from '@/integrations/components/IntegrationLogo';
 import { IntegrationsRecordTable } from '@/integrations/components/IntegrationsRecordTable';
 import { INTEGRATIONS } from '@/integrations/constants/integrations';
@@ -71,9 +72,14 @@ const TelegramIntegrationDetail = lazy(() =>
   ),
 );
 
+const OpenwaDetail = lazy(() => import('@/integrations/openwa/OpenwaDetail').then(
+  (module) => ({ default: module.OpenwaDetail }),
+));
+
 export const IntegrationDetailPage = () => {
   const { t } = useTranslation('frontline');
   useTelegramTranslation();
+  useOpenwaTranslation();
   const { integrationType, id } = useParams<{
     integrationType: string;
     id: string;
@@ -114,6 +120,7 @@ export const IntegrationDetailPage = () => {
         </div>
       </div>
       <Suspense fallback={<span>{t('loading', 'Loading…')}</span>}>
+        {integrationType === IntegrationType.OPENWA_MESSENGER && <OpenwaDetail />}
         {integrationType === IntegrationType.TELEGRAM_MESSENGER && (
           <TelegramIntegrationDetail />
         )}

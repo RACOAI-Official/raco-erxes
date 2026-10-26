@@ -22,7 +22,8 @@ export const AuthenticationLayout = ({
                   Raco AI · Based on erxes ·{' '}
                   <a
                     className="text-primary hover:underline"
-                    href="https://github.com/razin0900/https-github.com-razin0900-erxes"
+                    href="/assets/raco-source.tar.gz"
+                    download
                   >
                     Source code and license
                   </a>

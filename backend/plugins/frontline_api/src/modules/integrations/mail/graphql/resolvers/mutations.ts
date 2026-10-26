@@ -1,4 +1,6 @@
 import type { IContext } from '~/connectionResolvers';
+import { composeMailDraft, composeDraftSchema } from '@/integrations/mail/utils/composeDraft';
+import type { z } from 'zod';
 import { GraphQLError } from 'graphql';
 import type {
   IMailMessageDocument,
@@ -350,6 +352,16 @@ export const mailMutations = {
     await models.MailMessages.retrySend(note.mailMessageId, subdomain);
 
     return note;
+  },
+
+  async frontlineMailComposeDraft(
+    _root: undefined,
+    args: z.input<typeof composeDraftSchema>,
+    { subdomain, models, user, checkPermission }: IContext,
+  ) {
+    await checkPermission('conversationMessageAdd');
+    await assertMailSenderAccess({ models, subdomain, user, integrationId: args.integrationId });
+    return composeMailDraft(models, subdomain, args);
   },
 
   async mailDraftSave(

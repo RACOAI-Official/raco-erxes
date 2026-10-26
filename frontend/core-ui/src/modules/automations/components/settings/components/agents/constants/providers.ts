@@ -1,3 +1,4 @@
+// Raco AI local modifications: 2026-10-21. See RACO-CHANGES.md.
 export const AI_AGENT_PROVIDER_TYPES = [
   'cloudflare-ai-gateway',
   'grok',
@@ -20,7 +21,7 @@ export const AI_AGENT_PROVIDER_LABELS: Record<TAiAgentProvider, string> = {
   grok: 'Grok',
   kimi: 'Kimi',
   'kimi-code': 'Kimi Coding',
-  openai: 'OpenAI Direct',
+  openai: 'Raco LLM / OpenAI-compatible',
 };
 
 export const AI_AGENT_PROVIDER_DESCRIPTIONS: Record<TAiAgentProvider, string> =
@@ -31,7 +32,7 @@ export const AI_AGENT_PROVIDER_DESCRIPTIONS: Record<TAiAgentProvider, string> =
     kimi: 'Connect directly to Moonshot Kimi with organization-owned credentials.',
     'kimi-code':
       'Connect to Kimi Coding with Anthropic Messages-compatible credentials.',
-    openai: 'Connect directly to OpenAI with organization-owned credentials.',
+    openai: 'Use server-configured Raco LLM, or override the OpenAI-compatible connection.',
   };
 
 export const AI_AGENT_PROVIDER_DEFAULT_MODELS: Record<
@@ -42,7 +43,7 @@ export const AI_AGENT_PROVIDER_DEFAULT_MODELS: Record<
   grok: 'grok-4.3',
   kimi: 'kimi-k2.5',
   'kimi-code': 'kimi-for-coding',
-  openai: 'gpt-5-mini',
+  openai: 'qwen3',
 };
 
 export const AI_AGENT_PROVIDER_MODEL_OPTIONS: Record<
@@ -76,6 +77,7 @@ export const AI_AGENT_PROVIDER_MODEL_OPTIONS: Record<
   ],
   'kimi-code': ['kimi-for-coding'],
   openai: [
+    'qwen3',
     'gpt-5',
     'gpt-5-mini',
     'gpt-5-nano',
@@ -93,7 +95,7 @@ export const AI_AGENT_PROVIDER_DEFAULT_BASE_URLS: Record<
   grok: 'https://api.x.ai/v1',
   kimi: 'https://api.moonshot.ai/v1',
   'kimi-code': 'https://api.kimi.com/coding',
-  openai: 'https://api.openai.com/v1',
+  openai: '',
 };
 
 export const AI_AGENT_PROVIDER_API_KEY_PLACEHOLDERS: Record<
@@ -104,5 +106,5 @@ export const AI_AGENT_PROVIDER_API_KEY_PLACEHOLDERS: Record<
   grok: 'Enter xAI API key',
   kimi: 'Enter Moonshot API key',
   'kimi-code': 'Enter Kimi Coding API key',
-  openai: 'Enter OpenAI API key',
+  openai: 'Use server-configured Raco LLM key',
 };

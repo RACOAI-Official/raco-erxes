@@ -19,6 +19,7 @@ env:
 
 jobs:
   sales_api-ci:
+    if: github.repository_owner == 'erxes'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

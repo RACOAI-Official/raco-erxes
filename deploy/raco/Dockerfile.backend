@@ -10,6 +10,7 @@ RUN pnpm install --prod --frozen-lockfile \
     && test -f backend/gateway/dist/src/main.js \
     && test -f backend/plugins/operation_api/dist/src/main.js \
     && test -f backend/plugins/frontline_api/dist/src/main.js \
+    && test -f backend/plugins/sales_api/dist/src/main.js \
     && test -f backend/services/automations/dist/src/main.js \
     && cd /tmp \
     && curl --fail --location --retry 3 -o router.tar.gz https://github.com/apollographql/router/releases/download/v1.59.2/router-v1.59.2-x86_64-unknown-linux-gnu.tar.gz \
@@ -33,6 +34,7 @@ COPY --from=dependencies --chown=node:node /app/backend/core-api/ ./backend/core
 COPY --from=dependencies --chown=node:node /app/backend/gateway/ ./backend/gateway/
 COPY --from=dependencies --chown=node:node /app/backend/plugins/operation_api/ ./backend/plugins/operation_api/
 COPY --from=dependencies --chown=node:node /app/backend/plugins/frontline_api/ ./backend/plugins/frontline_api/
+COPY --from=dependencies --chown=node:node /app/backend/plugins/sales_api/ ./backend/plugins/sales_api/
 COPY --from=dependencies --chown=node:node /app/backend/services/automations/ ./backend/services/automations/
 COPY --from=dependencies --chown=node:node /app/backend/erxes-api-shared/ ./backend/erxes-api-shared/
 COPY --from=dependencies --chown=node:node /home/node/ /home/node/

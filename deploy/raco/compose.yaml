@@ -7,7 +7,7 @@ x-backend: &backend
   environment: &environment
     NODE_ENV: production
     VERSION: os
-    ENABLED_PLUGINS: operation
+    ENABLED_PLUGINS: operation,frontline,sales
     ENABLED_SERVICES: automations
     LOCAL_UPLOADS_DIR: /app/uploads
   volumes:
@@ -40,6 +40,22 @@ services:
       <<: *environment
       PORT: '3307'
       UI_ENTRY_URL: ${DOMAIN:?Set DOMAIN}/plugins/operation/remoteEntry.js
+  plugin-frontline-api:
+    <<: *backend
+    working_dir: /app/backend/plugins/frontline_api
+    command: [node, dist/src/main.js]
+    environment:
+      <<: *environment
+      PORT: '3304'
+      FRONTLINE_UI_ENTRY_URL: ${DOMAIN:?Set DOMAIN}/plugins/frontline/remoteEntry.js
+  plugin-sales-api:
+    <<: *backend
+    working_dir: /app/backend/plugins/sales_api
+    command: [node, dist/src/main.js]
+    environment:
+      <<: *environment
+      PORT: '3305'
+      UI_ENTRY_URL: ${DOMAIN:?Set DOMAIN}/plugins/sales/remoteEntry.js
   automations-service:
     <<: *backend
     working_dir: /app/backend/services/automations
@@ -57,6 +73,8 @@ services:
     depends_on:
       plugin-core-api: { condition: service_healthy }
       plugin-operation-api: { condition: service_healthy }
+      plugin-frontline-api: { condition: service_healthy }
+      plugin-sales-api: { condition: service_healthy }
     healthcheck:
       test:
         [

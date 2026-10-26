@@ -4,6 +4,24 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl python3 make g++ \
     && rm -rf /var/lib/apt/lists/* \
     && npm install --global pnpm@9.12.3 @apollo/rover@0.22.0
+
+# Pre-fetch Apollo Router binary and Rover supergraph plugin with retries into cached layer
+RUN mkdir -p /home/node/.rover/bin /root/.rover/bin /opt/router \
+    && cd /tmp \
+    && curl --fail --location --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 180 -o router.tar.gz https://github.com/apollographql/router/releases/download/v1.59.2/router-v1.59.2-x86_64-unknown-linux-gnu.tar.gz \
+    && curl --fail --location --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 180 -o sha256sums.txt https://github.com/apollographql/router/releases/download/v1.59.2/sha256sums.txt \
+    && grep ' router-v1.59.2-x86_64-unknown-linux-gnu.tar.gz$' sha256sums.txt | sed 's/router-v1.59.2-x86_64-unknown-linux-gnu.tar.gz/router.tar.gz/' | sha256sum --check - \
+    && tar -xzf router.tar.gz \
+    && cp dist/router /opt/router/router \
+    && rm -rf dist router.tar.gz sha256sums.txt \
+    && curl --fail --location --retry 5 --retry-delay 2 --connect-timeout 20 --max-time 180 https://rover.apollo.dev/tar/supergraph/x86_64-unknown-linux-gnu/v2.9.3 | tar -xz \
+    && cp dist/supergraph /home/node/.rover/bin/supergraph-v2.9.3 \
+    && cp dist/supergraph /home/node/.rover/bin/supergraph \
+    && cp dist/supergraph /root/.rover/bin/supergraph-v2.9.3 \
+    && cp dist/supergraph /root/.rover/bin/supergraph \
+    && chmod +x /home/node/.rover/bin/* /root/.rover/bin/* /opt/router/router \
+    && rm -rf dist
+
 COPY --chown=node:node . .
 RUN pnpm install --prod --frozen-lockfile \
     && test -f backend/core-api/dist/src/main.js \
@@ -12,16 +30,10 @@ RUN pnpm install --prod --frozen-lockfile \
     && test -f backend/plugins/frontline_api/dist/src/main.js \
     && test -f backend/plugins/sales_api/dist/src/main.js \
     && test -f backend/services/automations/dist/src/main.js \
-    && cd /tmp \
-    && curl --fail --location --retry 3 -o router.tar.gz https://github.com/apollographql/router/releases/download/v1.59.2/router-v1.59.2-x86_64-unknown-linux-gnu.tar.gz \
-    && curl --fail --location --retry 3 -o sha256sums.txt https://github.com/apollographql/router/releases/download/v1.59.2/sha256sums.txt \
-    && grep ' router-v1.59.2-x86_64-unknown-linux-gnu.tar.gz$' sha256sums.txt | sed 's/router-v1.59.2-x86_64-unknown-linux-gnu.tar.gz/router.tar.gz/' | sha256sum --check - \
-    && tar -xzf router.tar.gz \
     && mkdir -p /app/backend/gateway/dist/src/apollo-router/temp \
-    && find . -type f -name router -exec cp '{}' /app/backend/gateway/dist/src/apollo-router/temp/router \; \
+    && cp /opt/router/router /app/backend/gateway/dist/src/apollo-router/temp/router \
     && test -x /app/backend/gateway/dist/src/apollo-router/temp/router \
-    && rm -rf /tmp/router.tar.gz /tmp/sha256sums.txt \
-    && HOME=/home/node rover supergraph compose --config /app/backend/gateway/dist/src/apollo-router/dummy/supergraph.yaml --elv2-license=accept >/dev/null \
+    && for i in 1 2 3; do HOME=/home/node rover supergraph compose --config /app/backend/gateway/dist/src/apollo-router/dummy/supergraph.yaml --elv2-license=accept >/dev/null && break || sleep 2; done \
     && mkdir -p /app/uploads \
     && chown -R node:node /home/node /app/uploads /app/backend/gateway/dist/src/apollo-router/temp
 FROM node:22-bookworm-slim

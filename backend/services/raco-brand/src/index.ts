@@ -5,4 +5,8 @@ export type {
   RacoBrandCopy,
   RacoOrgWhiteLabelMapping,
 } from './types';
-export { DEFAULT_RACO_BRAND_CONFIG, loadRacoBrandConfig } from './config';
+export {
+  DEFAULT_RACO_BRAND_CONFIG,
+  loadRacoBrandConfig,
+  toOrgWhiteLabelPayload,
+} from './config';

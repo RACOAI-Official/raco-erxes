@@ -1,5 +1,14 @@
 # erxes — Agent & Contributor Guide
 
+## RacoAI repository and branch workflow
+
+- The canonical repository is https://github.com/RACOAI-Official/raco-erxes.git; use `origin` for pushes and pull requests.
+- For each distinct update, create a dedicated `codex/<task>` branch from the latest `origin/main`.
+- Push updates to that task branch, not directly to `main`. Open a pull request targeting `main` when appropriate; merge only when the user explicitly requests it.
+- The `raco` remote points to the previous repository. Do not push there unless the user explicitly asks.
+- Preserve unrelated local work and never force-push shared branches.
+
+
 Operating rules and codebase reference for anyone (human or AI) changing code in
 this repository. Preserve existing architecture, local patterns, and product
 behavior. Keep changes small and scoped to the request.

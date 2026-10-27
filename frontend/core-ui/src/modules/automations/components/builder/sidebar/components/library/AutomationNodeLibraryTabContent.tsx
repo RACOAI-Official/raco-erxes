@@ -1,3 +1,4 @@
+import { useWorkflowEditScope } from '@/automations/context/WorkflowEditScopeProvider';
 import { NodeLibraryRow } from '@/automations/components/builder/sidebar/components/library/NodeLibraryRow';
 import { useAutomationNodeLibraryGroups } from '@/automations/components/builder/sidebar/hooks/useAutomationNodeLibraryGroups';
 import { useAutomationBuilderSidebarHooks } from '@/automations/components/builder/sidebar/hooks/useAutomationBuilderSidebarHooks';
@@ -30,9 +31,11 @@ export const AutomationNodeLibraryTabContent = ({
   const { onDragStart, onSelectNode } = useAutomationNodeLibraryProvider();
   const groups = useAutomationNodeLibraryGroups({ type, list });
   const { isEmpty } = useAutomationNodes();
+  const workflowEditScope = useWorkflowEditScope();
   const { openNodeLibrary } = useAutomationBuilderSidebarHooks();
 
   if (
+    !workflowEditScope &&
     type === AutomationNodeType.Action &&
     isEmpty(AutomationNodeType.Trigger) &&
     isEmpty(AutomationNodeType.Action)

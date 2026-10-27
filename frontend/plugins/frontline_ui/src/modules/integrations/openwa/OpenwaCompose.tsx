@@ -26,7 +26,7 @@ const compose = gql`
 `;
 const schema = z.object({
   customerId: z.string().min(1),
-  text: z.string().trim().min(1).max(65536),
+  text: z.string().trim().min(1).max(4096),
 });
 type Values = z.infer<typeof schema>;
 

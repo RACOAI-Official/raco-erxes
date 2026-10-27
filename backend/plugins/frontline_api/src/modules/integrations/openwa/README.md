@@ -24,10 +24,13 @@ FRONTLINE_UI_ENTRY_URL=http://localhost:3004/remoteEntry.js
 
 Enable `frontline` alongside existing plugins in `ENABLED_PLUGINS`. Build and
 serve both `frontline_api` and `frontline_ui`. On this local setup the API is
-3304 and the UI remote is 3004. Create a CRM channel/brand and an external
-integration with kind `openwa-messenger` through the authenticated CRM API;
-save its returned ID in the configuration above. The configured subdomain must
-match the hostname used for authenticated CRM requests.
+3304 and the UI remote is 3004. Set `OPENWA_SUBDOMAIN` before creating the
+CRM channel/brand and external integration with kind `openwa-messenger` through
+the authenticated CRM API. Creation does not require `OPENWA_INTEGRATION_ID`;
+save the returned ID in that variable and restart Frontline. The configured
+subdomain must match the tenant used for authenticated CRM requests. On the
+RacoAI server, set `OPENWA_BASE_URL=http://openwa:2785` and use the OpenWA
+Compose project in `deploy/raco/openwa` on the `erxes_default` Docker network.
 
 ## Register the provider webhook
 
@@ -48,7 +51,9 @@ Content-Type: application/json
 The local Docker deployment requires `SSRF_ALLOWED_HOSTS=host.docker.internal`
 in OpenWA to permit that specific host; retain all other SSRF protection. An
 externally hosted deployment should use an HTTPS callback, normally the gateway
-path `/pl:frontline/openwa/receive`, and should not expose the plugin port.
+path `/pl:frontline/openwa/receive`, and should not expose the plugin port. For
+RacoAI the callback URL is
+`https://erxes.racoai.io/pl:frontline/openwa/receive`.
 Never put the signing secret in the callback URL. The local setup pins the
 tenant in server configuration; the callback's hostname cannot change it.
 

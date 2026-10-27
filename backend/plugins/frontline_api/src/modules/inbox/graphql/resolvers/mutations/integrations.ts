@@ -1,5 +1,4 @@
 import { ChannelScopes, IChannelDocument } from '@/channel/@types/channel';
-import { getOpenwaConfig } from '@/integrations/openwa/contract';
 import {
   IArchiveParams,
   IIntegration,
@@ -85,8 +84,11 @@ export const sendCreateIntegration = async (
   try {
     switch (serviceName) {
       case 'openwa': {
-        const config = getOpenwaConfig();
-        if (subdomain !== config.subdomain || data.kind !== 'openwa-messenger')
+        if (
+          !process.env.OPENWA_SUBDOMAIN ||
+          subdomain !== process.env.OPENWA_SUBDOMAIN ||
+          data.kind !== 'openwa-messenger'
+        )
           throw new Error('Invalid OpenWA tenant or integration kind');
         return { status: 'success' as const };
       }

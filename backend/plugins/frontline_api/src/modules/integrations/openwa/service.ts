@@ -251,8 +251,8 @@ export const handleOpenwaIntegration = async ({
   const text = stripHtml(
     reply.content.replace(/<br\s*\/?\s*>/gi, '\n').replace(/<\/p>/gi, '\n'),
   ).result.trim();
-  if (!text || text.length > 65536)
-    throw new Error('Enter a text reply of 1–65536 characters');
+  if (!text || text.length > 4096)
+    throw new Error('Enter a text reply of 1–4096 characters');
   const models = await generateModels(subdomain);
   const conversation = await models.Conversations.findOne({
     _id: reply.conversationId,

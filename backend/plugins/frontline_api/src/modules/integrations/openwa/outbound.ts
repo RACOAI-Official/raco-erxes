@@ -11,7 +11,7 @@ import { getOpenwaConfig, openwaHtml, openwaId } from './contract';
 
 export const composeOpenwaSchema = z.object({
   customerId: z.string().min(1),
-  text: z.string().trim().min(1).max(65536),
+  text: z.string().trim().min(1).max(4096),
   requestId: z
     .string()
     .min(8)

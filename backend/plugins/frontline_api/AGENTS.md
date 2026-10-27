@@ -1342,8 +1342,11 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
   a changed recipient/body with an already completed ID is rejected. Do not
   record `sent` until OpenWA returns a successful response with a message ID.
   `sent` means accepted by the WhatsApp session, not recipient delivery/read.
+  Text sent through OpenWA is limited to 4096 characters.
 
 - OpenWA credentials and webhook secret exist only in server environment values.
+  Integration creation checks `OPENWA_SUBDOMAIN` without requiring the
+  integration ID that the creation mutation returns; set that ID afterward.
   Ignore own messages, groups, statuses, and broadcasts before contact creation.
   Never interpret a WhatsApp privacy ID as a telephone number. Match existing
   contacts by phone; fill missing fields without overwriting curated names.

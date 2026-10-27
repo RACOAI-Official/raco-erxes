@@ -204,3 +204,17 @@ test('a forged mapping cannot send a reply to a different WhatsApp chat', async 
   ).rejects.toThrow('mapping');
   expect(global.fetch).not.toHaveBeenCalled();
 });
+
+test('rejects a reply above the OpenWA send-text limit', async () => {
+  global.fetch = jest.fn();
+  const data = {
+    ...replyData(),
+    payload: JSON.stringify({
+      integrationId: 'i1',
+      conversationId: openwaId('chat', 'i1', input.chatId),
+      content: 'x'.repeat(4097),
+    }),
+  };
+  await expect(handleOpenwaIntegration({ subdomain: 'tenant-a', data })).rejects.toThrow('4096');
+  expect(global.fetch).not.toHaveBeenCalled();
+});

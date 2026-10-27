@@ -100,7 +100,7 @@
 
 - `openwa-messenger` renders WhatsApp messages through the canonical inbox and
   supports text replies. The integration catalogue/detail show the server-managed
-  OpenWA connection and link to the local OpenWA dashboard for phone pairing.
+  OpenWA connection and link to `https://wa.racoai.io` for phone pairing.
   `src/modules/integrations/openwa/` owns its English fallback translations and
   the configuration/summary for the separate OpenWA message automation trigger.
   File attachment controls are hidden for outgoing OpenWA text messages; internal
@@ -1009,7 +1009,8 @@ to, bouncedRecipients, retryable, canRetry }` for its delivery state;
 
 - The OpenWA composer retains its request ID when retrying a failed send and
   resets it after confirmed success. Its mutation and the automation action use
-  Core contacts, not raw phone destinations supplied by browser payloads.
+  Core contacts, not raw phone destinations supplied by browser payloads. Both
+  forms limit text to 4096 characters, matching the provider send-text route.
 
 - OpenWA API keys and webhook signing secrets must never enter frontend code or
   GraphQL/UI payloads. OpenWA messages use the native inbox subscription/cache

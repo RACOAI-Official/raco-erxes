@@ -11,7 +11,7 @@ import { useOpenwaTranslation } from './translations';
 
 const schema = z.object({
   customerId: z.string().optional(),
-  text: z.string().trim().min(1).max(65536),
+  text: z.string().trim().min(1).max(4096),
 });
 type OpenwaActionConfig = z.infer<typeof schema>;
 

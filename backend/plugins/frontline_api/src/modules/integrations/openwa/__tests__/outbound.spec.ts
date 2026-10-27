@@ -51,6 +51,11 @@ test('provider failures do not write a message that looks sent', async () => {
   expect(createMessage).not.toHaveBeenCalled();
 });
 
+test('rejects text above the OpenWA send-text limit before calling the provider', async () => {
+  await expect(composeOpenwaMessage('tenant-a', { ...input, text: 'x'.repeat(4097) }, {})).rejects.toThrow();
+  expect(global.fetch).not.toHaveBeenCalled();
+});
+
 test('another tenant or a missing contact phone cannot reach WhatsApp', async () => {
   await expect(composeOpenwaMessage('tenant-b', input, {})).rejects.toThrow('tenant mismatch');
   jest.mocked(sendTRPCMessage).mockResolvedValue({ _id: 'c1', primaryPhone: 'invalid' });

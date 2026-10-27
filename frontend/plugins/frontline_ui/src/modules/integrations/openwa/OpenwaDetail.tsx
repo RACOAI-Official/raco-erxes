@@ -13,7 +13,7 @@ export const OpenwaDetail = () => {
           <p>{t('usage')}</p>
           <p>{t('pairing')}</p>
           <Button asChild variant="outline">
-            <a href="http://localhost:2785" target="_blank" rel="noreferrer">
+            <a href="https://wa.racoai.io" target="_blank" rel="noreferrer">
               {t('dashboard')}
             </a>
           </Button>

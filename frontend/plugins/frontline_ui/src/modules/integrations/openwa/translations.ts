@@ -20,6 +20,14 @@ const en = {
     'Reply with text in the inbox. Files, voice notes, and polls can be viewed or sent from WhatsApp. Group chats and status broadcasts are excluded.',
   pairing: 'Link your phone in OpenWA to begin receiving messages.',
   dashboard: 'Open OpenWA',
+  connect: 'Connect WhatsApp inbox',
+  connecting: 'Connecting…',
+  connected: 'WhatsApp inbox connected',
+  connectFailed: 'WhatsApp inbox could not be connected',
+  connectionName: 'Inbox name',
+  brand: 'Brand',
+  chooseBrand: 'Choose a brand',
+  channelRequired: 'Open this page from a channel to connect WhatsApp.',
   trigger:
     'Starts for each incoming direct WhatsApp message in the connected OpenWA inbox. Group messages, status broadcasts, and messages sent by your own account are excluded. The trigger supplies the contact, conversation, message content, and phone number when available.',
 };

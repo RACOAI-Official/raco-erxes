@@ -50,10 +50,10 @@ Content-Type: application/json
 
 The local Docker deployment requires `SSRF_ALLOWED_HOSTS=host.docker.internal`
 in OpenWA to permit that specific host; retain all other SSRF protection. An
-externally hosted deployment should use an HTTPS callback, normally the gateway
-path `/pl:frontline/openwa/receive`, and should not expose the plugin port. For
+externally hosted deployment should use an HTTPS callback through the web proxy
+at `/gateway/pl:frontline/openwa/receive`, and should not expose the plugin port. For
 RacoAI the callback URL is
-`https://erxes.racoai.io/pl:frontline/openwa/receive`.
+`https://erxes.racoai.io/gateway/pl:frontline/openwa/receive`.
 Never put the signing secret in the callback URL. The local setup pins the
 tenant in server configuration; the callback's hostname cannot change it.
 

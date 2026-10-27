@@ -97,6 +97,8 @@
   the stored conversation. The OpenWA automation send action has an editable
   text body, optional recipient binding, and a node summary. These are owned by
   `OpenwaCompose.tsx` and `OpenwaAction.tsx` in `integrations/openwa`.
+  `OpenwaDetail.tsx` creates the channel's external inbox integration with the
+  existing integration mutation before offering composition.
 
 - `openwa-messenger` renders WhatsApp messages through the canonical inbox and
   supports text replies. The integration catalogue/detail show the server-managed

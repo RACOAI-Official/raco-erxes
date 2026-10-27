@@ -34,7 +34,7 @@ it at `http://openwa:2785` (the Compose service network alias).
    `http://openwa:2785`, and set `OPENWA_API_KEY`, `OPENWA_SESSION_ID`,
    `OPENWA_INTEGRATION_ID`, and `OPENWA_WEBHOOK_SECRET`. Restart Frontline.
    Register a signed `message.received` webhook for the session with URL
-   `https://erxes.racoai.io/pl:frontline/openwa/receive` and the same secret.
+   `https://erxes.racoai.io/gateway/pl:frontline/openwa/receive` and the same secret.
 
 Back up `/opt/openwa/data` before changing the image version. Do not run
 `docker compose down -v`; the bind mount holds the key, database, and paired

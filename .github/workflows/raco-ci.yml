@@ -50,7 +50,7 @@ jobs:
         continue-on-error: true
         run: pnpm nx run-many -t lint -p core-ui core-api gateway operation_api automations-service --parallel=1
       - name: Build backend services
-        run: pnpm nx run-many -t build -p core-api gateway operation_api frontline_api automations-service --parallel=1
+        run: pnpm nx run-many -t build -p core-api gateway operation_api frontline_api sales_api automations-service --parallel=1
       - name: SaaS trial and provisioning regression tests
         run: |
           pnpm exec jest --config backend/erxes-api-shared/jest.config.ts --runInBand --testMatch='**/raco-access.spec.ts'
@@ -79,6 +79,7 @@ jobs:
             backend/gateway/dist/
             backend/plugins/operation_api/dist/
             backend/plugins/frontline_api/dist/
+            backend/plugins/sales_api/dist/
             backend/services/automations/dist/
             backend/erxes-api-shared/dist/
             backend/erxes-api-shared/utils/

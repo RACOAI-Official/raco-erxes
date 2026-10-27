@@ -60,6 +60,8 @@ jobs:
         run: pnpm nx build operation_ui
       - name: Build frontline UI
         run: pnpm nx build frontline_ui
+      - name: Build sales UI
+        run: pnpm nx build sales_ui
       - name: Package corresponding source and build branded UI
         run: |
           pnpm source:raco
@@ -88,6 +90,7 @@ jobs:
             dist/frontend/core-ui/
             dist/frontend/plugins/operation_ui/
             dist/frontend/plugins/frontline_ui/
+            dist/frontend/plugins/sales_ui/
       - name: Validation scope
         if: always()
         run: |

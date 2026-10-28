@@ -5,6 +5,7 @@ import { tmpdir } from 'os';
 import * as path from 'path';
 import { IModels } from '~/connectionResolvers';
 import { getConfig } from '~/modules/organization/settings/utils/configs';
+import { contextTextMime } from './contextText';
 
 export * from './delete';
 export * from './instance';
@@ -69,6 +70,13 @@ export const checkFile = async (
 
   // determine file type using magic numbers
   const ft = await fileTypeFromBuffer(buffer);
+  if (!ft) {
+    const mime = contextTextMime(originalFilename || '', file.mimetype || '', buffer);
+    if (mime) {
+      file.mimetype = mime;
+      return 'ok';
+    }
+  }
   const unsupportedMimeTypes = [
     'text/csv',
     'image/svg+xml',

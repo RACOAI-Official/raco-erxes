@@ -12,10 +12,11 @@ export const OpenwaTriggerSummary = () => {
 export const OpenwaTriggerForm = ({
   formRef,
   onSaveTriggerConfig,
-}: AutomationTriggerFormProps<Record<string, never>>) => {
+}: AutomationTriggerFormProps<{ event: 'message.received' }>) => {
   useAutomationRemoteFormSubmit({
     formRef,
-    callback: () => onSaveTriggerConfig({}),
+    // The builder requires a non-empty config for every custom trigger.
+    callback: () => onSaveTriggerConfig({ event: 'message.received' }),
   });
   return <OpenwaTriggerSummary />;
 };

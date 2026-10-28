@@ -1,5 +1,7 @@
 import { createHmac } from 'node:crypto';
 import type { Request, Response } from 'express';
+import express from 'express';
+import type { AddressInfo } from 'node:net';
 import { openwaRouter } from '../routes';
 import { getOpenwaConfig } from '../contract';
 import { getOpenwaAiConfig, receiveOpenwaAiReply } from '../aiReply';
@@ -24,7 +26,35 @@ type RouteLayer = {
 };
 const layers = (openwaRouter as unknown as { stack: RouteLayer[] }).stack;
 const handler = layers.find((layer) => layer.route?.path === '/ai-reply')?.route
-  ?.stack[0].handle;
+  ?.stack.at(-1)?.handle;
+
+it('throttles webhook floods before authentication or model calls', async () => {
+  process.env.OPENWA_AI_ENABLED = 'false';
+  const app = express();
+  app.use(openwaRouter);
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise<void>((resolve) => server.once('listening', resolve));
+  const port = (server.address() as AddressInfo).port;
+  try {
+    for (let i = 0; i < 240; i++) {
+      const response = await fetch(`http://127.0.0.1:${port}/ai-reply`, {
+        method: 'POST',
+      });
+      await response.text();
+      expect(response.status).toBe(503);
+    }
+    const limited = await fetch(`http://127.0.0.1:${port}/receive`, {
+      method: 'POST',
+    });
+    await limited.text();
+    expect(limited.status).toBe(429);
+    expect(getOpenwaConfig).not.toHaveBeenCalled();
+    expect(receiveOpenwaAiReply).not.toHaveBeenCalled();
+  } finally {
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+});
 
 const request = () => {
   const body = {

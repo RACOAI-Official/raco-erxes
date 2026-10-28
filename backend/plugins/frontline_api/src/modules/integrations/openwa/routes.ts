@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { ZodError } from 'zod';
 import {
   getOpenwaConfig,
@@ -11,6 +12,16 @@ import { receiveOpenwaMessage } from './service';
 import { getOpenwaAiConfig, receiveOpenwaAiReply } from './aiReply';
 
 export const openwaRouter: Router = Router();
+
+// One server-managed integration: a shared budget also bounds invalid HMACs
+// behind proxies without trusting client-controlled forwarded IP headers.
+const webhookLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 240,
+  keyGenerator: () => 'openwa',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const handleWebhook =
   (aiReply: boolean) => async (req: Request, res: Response) => {
@@ -67,5 +78,5 @@ const handleWebhook =
     }
   };
 
-openwaRouter.post('/receive', handleWebhook(false));
-openwaRouter.post('/ai-reply', handleWebhook(true));
+openwaRouter.post('/receive', webhookLimiter, handleWebhook(false));
+openwaRouter.post('/ai-reply', webhookLimiter, handleWebhook(true));

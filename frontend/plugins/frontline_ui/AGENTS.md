@@ -105,6 +105,8 @@
   OpenWA connection and link to `https://wa.racoai.io` for phone pairing.
   `src/modules/integrations/openwa/` owns its English fallback translations and
   the configuration/summary for the separate OpenWA message automation trigger.
+  Saving the OpenWA trigger persists `{ event: 'message.received' }`; keep this
+  configuration non-empty to satisfy the host builder's custom-trigger validation.
   File attachment controls are hidden for outgoing OpenWA text messages; internal
   notes keep normal file controls.
 

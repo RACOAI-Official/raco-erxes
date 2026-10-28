@@ -1,5 +1,5 @@
 import { composeOpenwaMessage } from '../outbound';
-import { getOpenwaConfig, openwaHtml } from '../contract';
+import { getOpenwaConfig, openwaHtml, openwaId } from '../contract';
 import { generateModels, type IModels } from '~/connectionResolvers';
 import { sendTRPCMessage } from 'erxes-api-shared/utils';
 import { pConversationClientMessageInserted } from '@/inbox/graphql/resolvers/mutations/widget';
@@ -67,4 +67,24 @@ test('a malformed provider success cannot create a false sent record', async () 
   global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
   await expect(composeOpenwaMessage('tenant-a', input, {})).rejects.toThrow();
   expect(createMessage).not.toHaveBeenCalled();
+});
+
+test('replies to the saved privacy chat without requiring a contact phone', async () => {
+  jest.mocked(sendTRPCMessage).mockResolvedValue({ _id: 'c1' });
+  exists.mockResolvedValue(true);
+  const chatId = '123456789012345@lid';
+  const conversationId = openwaId('chat', 'i1', chatId);
+  await composeOpenwaMessage('tenant-a', input, { fromBot: true }, { chatId, conversationId });
+  expect(exists).toHaveBeenCalledWith({ _id: conversationId, integrationId: 'i1', customerId: 'c1' });
+  expect(global.fetch).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ body: JSON.stringify({ chatId, text: input.text }) }));
+  expect(createMessage).toHaveBeenCalledWith(expect.objectContaining({ conversationId }));
+});
+
+test('rejects unbound or group reply targets before provider delivery', async () => {
+  const chatId = '123456789012345@lid';
+  await expect(composeOpenwaMessage('tenant-a', input, {}, { chatId, conversationId: openwaId('chat', 'i1', chatId) })).rejects.toThrow('does not belong');
+  exists.mockResolvedValue(true);
+  await expect(composeOpenwaMessage('tenant-a', input, {}, { chatId, conversationId: 'wrong' })).rejects.toThrow('does not belong');
+  await expect(composeOpenwaMessage('tenant-a', input, {}, { chatId: '123@g.us', conversationId: 'wrong' })).rejects.toThrow('Invalid direct');
+  expect(global.fetch).not.toHaveBeenCalled();
 });

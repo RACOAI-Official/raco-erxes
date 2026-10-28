@@ -70,6 +70,9 @@
   Do not use this endpoint alongside another automatic reply workflow.
   Both OpenWA webhook routes share a 240-request/minute process budget before
   HMAC validation; keep this limiter when adding handlers or changing proxies.
+  Dedicated replies preserve the authenticated inbound chat ID, including @lid,
+  and verify its saved conversation belongs to the contact and integration.
+  Phone-based composition remains separate; never treat an @lid as a phone.
 
 - `frontlineMailComposeDraft` creates a contact-linked email conversation and
   pending draft without delivery; it requires send permission and inbox access.

@@ -24,6 +24,7 @@ export const composeOpenwaMessage = async (
   subdomain: string,
   input: z.infer<typeof composeOpenwaSchema>,
   actor: { userId?: string; fromBot?: boolean },
+  replyTo?: { chatId: string; conversationId: string },
 ): Promise<IMessageDocument> => {
   const config = getOpenwaConfig();
   if (subdomain !== config.subdomain) throw new Error('OpenWA tenant mismatch');
@@ -44,12 +45,30 @@ export const composeOpenwaMessage = async (
     input: { query: { _id: doc.customerId } },
   });
   const contact = z
-    .object({ _id: z.string(), primaryPhone: z.string() })
+    .object({ _id: z.string(), primaryPhone: z.string().nullish() })
     .parse(customer);
-  const phone = contact.primaryPhone.replace(/^\+|^00/, '');
-  if (!/^[1-9]\d{6,14}$/.test(phone))
-    throw new Error('Contact needs an international WhatsApp phone number');
-  const chatId = `${phone}@c.us`;
+  if (contact._id !== doc.customerId) throw new Error('OpenWA contact mismatch');
+  let chatId: string;
+  if (replyTo) {
+    if (!/^\d{1,32}@(c\.us|s\.whatsapp\.net|lid)$/.test(replyTo.chatId))
+      throw new Error('Invalid direct WhatsApp reply target');
+    const expected = openwaId('chat', config.integrationId, replyTo.chatId);
+    if (
+      replyTo.conversationId !== expected ||
+      !(await models.Conversations.exists({
+        _id: expected,
+        integrationId: config.integrationId,
+        customerId: contact._id,
+      }))
+    )
+      throw new Error('WhatsApp reply target does not belong to this contact');
+    chatId = replyTo.chatId;
+  } else {
+    const phone = (contact.primaryPhone || '').replace(/^\+/, '').replace(/^00/, '');
+    if (!/^[1-9]\d{6,14}$/.test(phone))
+      throw new Error('Contact needs an international WhatsApp phone number');
+    chatId = `${phone}@c.us`;
+  }
   const conversationId = openwaId('chat', config.integrationId, chatId);
   const messageId = openwaId('outbound', config.integrationId, doc.requestId);
   const previous = await models.ConversationMessages.findOne({

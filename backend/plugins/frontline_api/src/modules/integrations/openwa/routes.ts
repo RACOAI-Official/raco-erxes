@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import {
   getOpenwaConfig,
@@ -8,49 +8,64 @@ import {
   verifyOpenwaSignature,
 } from './contract';
 import { receiveOpenwaMessage } from './service';
+import { getOpenwaAiConfig, receiveOpenwaAiReply } from './aiReply';
 
 export const openwaRouter: Router = Router();
 
-openwaRouter.post('/receive', async (req: Request, res) => {
-  let config: ReturnType<typeof getOpenwaConfig>;
-  try {
-    config = getOpenwaConfig();
-  } catch {
-    res.status(503).json({ error: 'OpenWA integration is not configured' });
-    return;
-  }
-  const rawBody: unknown = (req as Request & { rawBody?: unknown }).rawBody;
-  if (
-    !Buffer.isBuffer(rawBody) ||
-    !verifyOpenwaSignature(
-      rawBody,
-      req.get('X-OpenWA-Signature'),
-      config.secret,
-    )
-  ) {
-    res.sendStatus(401);
-    return;
-  }
-  try {
-    const envelope = openwaEnvelope.parse(req.body);
-    if (envelope.sessionId !== config.sessionId) {
-      res.sendStatus(403);
+const handleWebhook =
+  (aiReply: boolean) => async (req: Request, res: Response) => {
+    if (aiReply && process.env.OPENWA_AI_ENABLED !== 'true') {
+      res.status(503).json({ error: 'OpenWA AI replies are disabled' });
       return;
     }
-    // Authenticate test probes too; unsupported events never create contacts.
-    if (envelope.event !== 'message.received') {
-      res.sendStatus(204);
+    let config: ReturnType<typeof getOpenwaConfig>;
+    try {
+      config = getOpenwaConfig();
+      if (aiReply) getOpenwaAiConfig();
+    } catch {
+      res.status(503).json({ error: 'OpenWA integration is not configured' });
       return;
     }
-    const message = openwaMessage.parse(envelope.data);
-    const id = await receiveOpenwaMessage(message);
-    res.status(200).json({ accepted: true, messageId: id });
-  } catch (error: unknown) {
-    res.status(error instanceof ZodError ? 400 : 503).json({
-      error:
-        error instanceof ZodError
-          ? 'Invalid OpenWA event'
-          : 'Processing failed; retry delivery',
-    });
-  }
-});
+    const rawBody: unknown = (req as Request & { rawBody?: unknown }).rawBody;
+    if (
+      !Buffer.isBuffer(rawBody) ||
+      !verifyOpenwaSignature(
+        rawBody,
+        req.get('X-OpenWA-Signature'),
+        config.secret,
+      )
+    ) {
+      res.sendStatus(401);
+      return;
+    }
+    try {
+      const envelope = openwaEnvelope.parse(req.body);
+      if (envelope.sessionId !== config.sessionId) {
+        res.sendStatus(403);
+        return;
+      }
+      // Authenticate test probes too; unsupported events never create contacts.
+      if (envelope.event !== 'message.received') {
+        res.sendStatus(204);
+        return;
+      }
+      const message = openwaMessage.parse(envelope.data);
+      if (aiReply) {
+        const result = await receiveOpenwaAiReply(message);
+        res.status(200).json({ accepted: true, ...result });
+        return;
+      }
+      const id = await receiveOpenwaMessage(message);
+      res.status(200).json({ accepted: true, messageId: id });
+    } catch (error: unknown) {
+      res.status(error instanceof ZodError ? 400 : 503).json({
+        error:
+          error instanceof ZodError
+            ? 'Invalid OpenWA event'
+            : 'Processing failed; retry delivery',
+      });
+    }
+  };
+
+openwaRouter.post('/receive', handleWebhook(false));
+openwaRouter.post('/ai-reply', handleWebhook(true));

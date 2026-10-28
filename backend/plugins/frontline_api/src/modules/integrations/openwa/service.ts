@@ -98,6 +98,7 @@ const syncCustomer = async (message: OpenwaMessage): Promise<string> => {
 /** Serializes a sender's deliveries, recovers inserts, and deduplicates trigger jobs. */
 export const receiveOpenwaMessage = async (
   message: OpenwaMessage,
+  options: { emitAutomationTrigger?: boolean } = {},
 ): Promise<string | null> => {
   if (
     message.fromMe ||
@@ -172,24 +173,26 @@ export const receiveOpenwaMessage = async (
     await pConversationClientMessageInserted(config.subdomain, stored);
     // Same public automation queue/envelope as sendAutomationTrigger, awaited
     // before acknowledging. Retained job IDs prevent retries starting a second run.
-    await sendWorkerQueue('automations', 'trigger').add(
-      'trigger',
-      {
-        subdomain: config.subdomain,
-        data: {
-          type: 'frontline:inbox.openwaMessages',
-          targets: [
-            {
-              ...stored.toObject(),
-              integrationId: integration._id,
-              source: 'openwa',
-              phone: openwaPhone(message),
-            },
-          ],
+    if (options.emitAutomationTrigger !== false) {
+      await sendWorkerQueue('automations', 'trigger').add(
+        'trigger',
+        {
+          subdomain: config.subdomain,
+          data: {
+            type: 'frontline:inbox.openwaMessages',
+            targets: [
+              {
+                ...stored.toObject(),
+                integrationId: integration._id,
+                source: 'openwa',
+                phone: openwaPhone(message),
+              },
+            ],
+          },
         },
-      },
-      { jobId: messageId, removeOnComplete: false, removeOnFail: false },
-    );
+        { jobId: messageId, removeOnComplete: false, removeOnFail: false },
+      );
+    }
     await models.ConversationMessages.updateOne(
       { _id: messageId },
       {

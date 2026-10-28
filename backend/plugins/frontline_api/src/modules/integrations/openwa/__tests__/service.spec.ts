@@ -91,6 +91,12 @@ afterEach(() => {
   global.fetch = originalFetch;
 });
 
+test('dedicated AI webhook intake does not enqueue an automation trigger', async () => {
+  await receiveOpenwaMessage(input, { emitAutomationTrigger: false });
+  expect(createMessage).toHaveBeenCalled();
+  expect(queueAdd).not.toHaveBeenCalled();
+});
+
 test.each([
   { ...input, fromMe: true },
   { ...input, isGroup: true },

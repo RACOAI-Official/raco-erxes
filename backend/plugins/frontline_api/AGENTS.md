@@ -61,6 +61,16 @@
 
 ## Current Capabilities
 
+- The server-managed `POST /openwa/ai-reply` endpoint authenticates the same
+  OpenWA HMAC and pinned session as `/receive`, stores the inbound message without
+  enqueueing an automation, then calls a separately configured text-only LLM and
+  the existing OpenWA composer. It is disabled unless `OPENWA_AI_ENABLED=true`.
+  Durable per-message states prevent duplicate sends; interrupted/uncertain sends
+  require human review. Redis pause keys persist opt-outs and human requests.
+  Do not use this endpoint alongside another automatic reply workflow.
+  Both OpenWA webhook routes share a 240-request/minute process budget before
+  HMAC validation; keep this limiter when adding handlers or changing proxies.
+
 - `frontlineMailComposeDraft` creates a contact-linked email conversation and
   pending draft without delivery; it requires send permission and inbox access.
   Draft automation config `mode: compose` accepts inbox, recipient, subject and

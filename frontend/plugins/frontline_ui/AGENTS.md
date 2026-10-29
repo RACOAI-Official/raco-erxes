@@ -91,6 +91,8 @@
 - Knowledge base topic creation reads and writes `createTopic` as a Boolean
   through `useQueryState`; the header, empty state and navigation URL open the
   same sidebar-owned drawer and consume the flag without losing other filters.
+- Jest resolves both plugin aliases (`@/` for modules and `~/` for source);
+  run GraphQL codegen before suites that import the generated `~/gql` client.
 
 - Email drafts show a recipient/subject confirmation before approval sends them.
   Manual email composition/replies also confirm through `useMailSendMail`.

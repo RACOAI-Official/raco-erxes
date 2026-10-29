@@ -88,6 +88,10 @@
 
 ## Current Capabilities
 
+- Knowledge base topic creation reads and writes `createTopic` as a Boolean
+  through `useQueryState`; the header, empty state and navigation URL open the
+  same sidebar-owned drawer and consume the flag without losing other filters.
+
 - Email drafts show a recipient/subject confirmation before approval sends them.
   Manual email composition/replies also confirm through `useMailSendMail`.
   Compose-mode draft automation settings retain inbox/contact/recipient bindings.

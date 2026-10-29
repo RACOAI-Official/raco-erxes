@@ -79,7 +79,7 @@ export const KnowledgeBaseSidebar = () => {
   const { topicId } = useKnowledgeBaseRoute();
   const { setOpen: openCurrentTopic } = useTopicOpenState(topicId);
   const { topics, loading, error } = useTopics();
-  const [createTopic, setCreateTopic] = useQueryState<string>('createTopic');
+  const [createTopic, setCreateTopic] = useQueryState<boolean>('createTopic');
   const [isTopicCreateOpen, setIsTopicCreateOpen] = useState(false);
   const [categoryDraft, setCategoryDraft] = useState<TCategoryDraft>();
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
@@ -97,7 +97,7 @@ export const KnowledgeBaseSidebar = () => {
   }, [openCurrentTopic]);
 
   useEffect(() => {
-    if (createTopic !== 'true') return;
+    if (createTopic !== true) return;
 
     setIsTopicCreateOpen(true);
     setCreateTopic(null);

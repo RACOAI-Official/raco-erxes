@@ -35,11 +35,11 @@ const TopicsContent = ({
 export const Topics = () => {
   const { t } = useTranslation('frontline');
   const { search } = useLocation();
-  const [, setCreateTopic] = useQueryState<string>('createTopic');
+  const [, setCreateTopic] = useQueryState<boolean>('createTopic');
   const { topics, loading, error } = useTopics();
 
   const firstTopic = topics?.[0];
-  const openCreateTopic = () => setCreateTopic('true');
+  const openCreateTopic = () => setCreateTopic(true);
 
   if (firstTopic) {
     return (

@@ -11,7 +11,7 @@ jest.mock('erxes-api-shared/utils', () => ({
 jest.mock('~/utils/email/ramp', () => ({ getStatus: jest.fn() }));
 jest.mock('~/utils/email', () => ({ sendEmail: jest.fn() }));
 jest.mock('~/modules/notifications/utils', () => ({ initFirebase: jest.fn() }));
-jest.mock('@/organization/settings/utils/configs', () => ({ getConfig: jest.fn() }));
+jest.mock('@/organization/settings/utils/configs', () => ({ getConfig: jest.fn() }), { virtual: true });
 jest.mock('firebase-admin', () => ({ apps: [] }), { virtual: true });
 
 type Row = {

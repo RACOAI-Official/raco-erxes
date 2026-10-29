@@ -29,6 +29,7 @@ export const notificationTrpcRouter = t.router({
           ...data,
           userId,
           isRead: false,
+          isArchived: false,
           priorityLevel: PRIORITY_ORDER[priority || 'medium'],
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         };

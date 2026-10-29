@@ -1,8 +1,7 @@
 import { useCreateBlockNote } from '@blocknote/react';
 import { BLOCK_SCHEMA } from 'erxes-ui/modules/blocks/constant/blockEditorSchema';
 import { BlockNoteView } from '@blocknote/shadcn';
-import { useAtomValue } from 'jotai';
-import { themeState } from 'erxes-ui/state';
+import { useResolvedTheme } from '../../../hooks/use-resolved-theme';
 import { parseBlocks } from '../utils';
 import DOMPurify from 'dompurify';
 import { cn } from 'erxes-ui/lib';
@@ -23,7 +22,7 @@ export const BlockEditorReadOnly = React.forwardRef<
     initialContent: contentBlocks || undefined,
     resolveFileUrl: (url) => Promise.resolve(readImage(url)),
   });
-  const theme = useAtomValue(themeState);
+  const theme = useResolvedTheme();
 
   // The editor instance keeps its initialContent; sync blocks when the
   // content prop changes after mount.
@@ -61,7 +60,7 @@ export const BlockEditorReadOnly = React.forwardRef<
       formattingToolbar={false}
       slashMenu={false}
       sideMenu={false}
-      theme={theme as 'light' | 'dark'}
+      theme={theme}
     />
   );
 });

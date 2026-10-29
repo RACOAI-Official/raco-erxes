@@ -3,18 +3,20 @@ import { IContext } from '~/connectionResolvers';
 import { generateNotificationsFilter } from '~/modules/notifications/graphql/resolver/utils';
 import { release } from '~/utils/email/ramp';
 
+type NotificationFilters = Parameters<typeof generateNotificationsFilter>[0];
+
 export const notificationMutations = {
   async archiveNotification(
     _root: undefined,
     { _id }: { _id: string },
     { models, user }: IContext,
   ) {
-    const notification = await models.Notifications.findOne({ _id });
+    const notification = await models.Notifications.findOne({
+      _id,
+      userId: user._id,
+    });
 
     if (!notification) throw new Error('Not found notification');
-
-    if (notification.userId !== user._id)
-      throw new Error('Not found notification');
 
     await models.Notifications.updateOne(
       { _id, userId: user._id },
@@ -34,15 +36,18 @@ export const notificationMutations = {
       ids,
       archiveAll,
       filters,
-    }: { ids: string[]; archiveAll: boolean; filters: any },
+    }: { ids: string[]; archiveAll: boolean; filters: NotificationFilters },
     { models, user }: IContext,
   ) {
-    const selector = archiveAll
-      ? { ...generateNotificationsFilter(filters) }
-      : { _id: { $in: ids } };
+    const selector = {
+      ...(archiveAll
+        ? generateNotificationsFilter(filters)
+        : { _id: { $in: ids } }),
+      userId: user._id,
+    };
 
     const notificationIds = await models.Notifications.find(
-      { userId: user._id, ...selector },
+      selector,
       {
         _id: 1,
       },
@@ -62,12 +67,15 @@ export const notificationMutations = {
     { _id }: { _id: string },
     { models, user }: IContext,
   ) {
-    const notification = await models.Notifications.findOne({ _id });
+    const notification = await models.Notifications.findOne({
+      _id,
+      userId: user._id,
+    });
     if (!notification) throw new Error('Not found notification');
 
     if (!notification.isRead) {
       await models.Notifications.updateOne(
-        { _id },
+        { _id, userId: user._id },
         { $set: { isRead: true, readAt: new Date() } },
       );
 
@@ -81,19 +89,22 @@ export const notificationMutations = {
 
   async markAsReadNotifications(
     _root: undefined,
-    { ids, ...filters }: { ids: string[]; [key: string]: any },
+    { ids, ...filters }: NotificationFilters,
     { models, user }: IContext,
   ) {
-    const filter = ids.length
-      ? { _id: { $in: ids } }
-      : generateNotificationsFilter(filters as any);
+    const filter = {
+      ...(ids.length
+        ? { _id: { $in: ids } }
+        : generateNotificationsFilter({ ...filters, ids: [] })),
+      userId: user._id,
+    };
 
     const notificationIds = await models.Notifications.find(filter, {
       _id: 1,
     }).distinct('_id');
 
     await models.Notifications.updateMany(
-      { ...filter, userId: user._id },
+      filter,
       {
         $set: { isRead: true, readAt: new Date() },
       },

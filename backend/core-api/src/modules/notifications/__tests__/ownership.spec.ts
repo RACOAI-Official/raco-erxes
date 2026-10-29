@@ -1,11 +1,16 @@
 import type { IContext } from '~/connectionResolvers';
 import { graphqlPubsub } from 'erxes-api-shared/utils';
 import { notificationMutations } from '../graphql/resolver/mutations';
+import { notificationQueries } from '../graphql/resolver/queries';
+import notificationReferences from '../graphql/customResolvers/notification';
+import subscriptions from '../../../apollo/subscription';
+import type { INotificationDocument } from 'erxes-api-shared/core-modules';
 
 jest.mock('erxes-api-shared/utils', () => ({
   graphqlPubsub: { publish: jest.fn() },
 }), { virtual: true });
 jest.mock('~/utils/email/ramp', () => ({ release: jest.fn() }));
+jest.mock('graphql-subscriptions', () => ({ withFilter: jest.fn() }));
 
 type Selector = Record<string, unknown>;
 type Notification = {
@@ -61,6 +66,7 @@ describe('notification recipient ownership', () => {
     updateOne = jest.fn(update);
     updateMany = jest.fn(update);
     context = {
+      subdomain: 'audit-tenant',
       user: { _id: 'support' },
       models: {
         Notifications: {
@@ -87,6 +93,50 @@ describe('notification recipient ownership', () => {
       expect(updateOne).not.toHaveBeenCalled();
       expect(graphqlPubsub.publish).not.toHaveBeenCalled();
       expect(rows[1]).toMatchObject({ isRead: false, isArchived: false });
+    },
+  );
+
+  it.each(['foreign', 'missing'])('denies notification detail for %s', async (_id) => {
+    await expect(
+      notificationQueries.notificationDetail(undefined, { _id }, context),
+    ).rejects.toThrow('Not found notification');
+  });
+
+  it('allows recipient notification detail', async () => {
+    await expect(
+      notificationQueries.notificationDetail(undefined, { _id: 'own' }, context),
+    ).resolves.toMatchObject({ _id: 'own', userId: 'support' });
+  });
+
+  it.each(['own', 'foreign'])('scopes notification references for %s', async (_id) => {
+    const result = await notificationReferences.__resolveReference(
+      { _id } as INotificationDocument, context,
+    );
+    expect(result?._id).toBe(_id === 'own' ? 'own' : undefined);
+  });
+
+  it.each(['notificationInserted', 'notificationRead', 'notificationArchived'] as const)(
+    '%s authorizes recipients and isolates tenant topics',
+    (operation) => {
+      const asyncIterator = jest.fn();
+      const resolver = subscriptions.generateResolvers({ asyncIterator })[operation];
+      expect(() => resolver.subscribe(undefined, { userId: 'sales' }, {
+        subdomain: 'audit-tenant', user: { _id: 'support' },
+      })).toThrow('Not authorized');
+      expect(() => resolver.subscribe(undefined, { userId: 'support' }, {
+        subdomain: 'audit-tenant',
+      })).toThrow('Not authorized');
+      expect(asyncIterator).not.toHaveBeenCalled();
+      resolver.subscribe(undefined, { userId: 'support' }, {
+        subdomain: 'audit-tenant', user: { _id: 'support' },
+      });
+      resolver.subscribe(undefined, {}, {
+        subdomain: 'other-tenant', user: { _id: 'support' },
+      });
+      expect(asyncIterator.mock.calls).toEqual([
+        [`${operation}:audit-tenant:support`],
+        [`${operation}:other-tenant:support`],
+      ]);
     },
   );
 
@@ -124,7 +174,7 @@ describe('notification recipient ownership', () => {
     expect(rows[0].isArchived).toBe(true);
     expect(rows[1].isArchived).toBe(false);
     expect(updateMany.mock.calls[0][0]).toMatchObject({ userId: 'support' });
-    expect(graphqlPubsub.publish).toHaveBeenCalledWith('notificationArchived:support', {
+    expect(graphqlPubsub.publish).toHaveBeenCalledWith('notificationArchived:audit-tenant:support', {
       notificationArchived: { userId: 'support', notificationIds: ['own'] },
     });
   });
@@ -137,7 +187,7 @@ describe('notification recipient ownership', () => {
     expect(rows[0].isRead).toBe(true);
     expect(rows[1].isRead).toBe(false);
     expect(updateMany.mock.calls[0][0]).toMatchObject({ userId: 'support' });
-    expect(graphqlPubsub.publish).toHaveBeenCalledWith('notificationRead:support', {
+    expect(graphqlPubsub.publish).toHaveBeenCalledWith('notificationRead:audit-tenant:support', {
       notificationRead: { userId: 'support', notificationIds: ['own'] },
     });
   });

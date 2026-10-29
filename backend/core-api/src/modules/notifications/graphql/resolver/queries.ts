@@ -38,6 +38,7 @@ const generateOrderByNotifications = (orderBy?: any) => {
 
 const generateActiveNotificationsFilter =
   (): FilterQuery<INotificationDocument> => ({
+    isArchived: { $ne: true },
     $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }],
   });
 

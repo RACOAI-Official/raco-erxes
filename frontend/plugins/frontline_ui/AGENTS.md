@@ -1019,6 +1019,10 @@ to, bouncedRecipients, retryable, canRetry }` for its delivery state;
 
 ## Local Invariants
 
+- Internal-note sends derive mentioned recipient IDs from the submitted editor
+  blocks. Restored drafts must notify their actual mentions, and deleted mentions
+  must not leave stale recipients in a cached composer state.
+
 - The OpenWA composer retains its request ID when retrying a failed send and
   resets it after confirmed success. Its mutation and the automation action use
   Core contacts, not raw phone destinations supplied by browser payloads. Both

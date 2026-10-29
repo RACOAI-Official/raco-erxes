@@ -97,11 +97,13 @@ export const KnowledgeBaseSidebar = () => {
   }, [openCurrentTopic]);
 
   useEffect(() => {
-    if (createTopic !== true) return;
+    // The index redirects once topics load. Preserve the request until the
+    // destination sidebar mounts, otherwise its drawer state is discarded.
+    if (createTopic !== true || loading || (!topicId && topics?.length)) return;
 
     setIsTopicCreateOpen(true);
     setCreateTopic(null);
-  }, [createTopic, setCreateTopic]);
+  }, [createTopic, setCreateTopic, loading, topicId, topics?.length]);
 
   return (
     <Sidebar.Panel

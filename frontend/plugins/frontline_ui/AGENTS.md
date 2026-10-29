@@ -91,6 +91,8 @@
 - Knowledge base topic creation reads and writes `createTopic` as a Boolean
   through `useQueryState`; the header, empty state and navigation URL open the
   same sidebar-owned drawer and consume the flag without losing other filters.
+  Defer consuming it while topics load or while the index will redirect to an
+  existing topic; the destination sidebar owns the opened drawer.
 - Jest resolves both plugin aliases (`@/` for modules and `~/` for source);
   run GraphQL codegen before suites that import the generated `~/gql` client.
 

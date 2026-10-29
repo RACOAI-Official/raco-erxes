@@ -9,7 +9,7 @@ export const notificationMutations = {
   async archiveNotification(
     _root: undefined,
     { _id }: { _id: string },
-    { models, user }: IContext,
+    { models, user, subdomain }: IContext,
   ) {
     const notification = await models.Notifications.findOne({
       _id,
@@ -23,7 +23,7 @@ export const notificationMutations = {
       { isArchived: true },
     );
 
-    graphqlPubsub.publish(`notificationArchived:${user._id}`, {
+    graphqlPubsub.publish(`notificationArchived:${subdomain}:${user._id}`, {
       notificationArchived: { userId: user._id, notificationId: _id },
     });
 
@@ -37,7 +37,7 @@ export const notificationMutations = {
       archiveAll,
       filters,
     }: { ids: string[]; archiveAll: boolean; filters: NotificationFilters },
-    { models, user }: IContext,
+    { models, user, subdomain }: IContext,
   ) {
     const selector = {
       ...(archiveAll
@@ -55,7 +55,7 @@ export const notificationMutations = {
 
     await models.Notifications.updateMany(selector, { isArchived: true });
 
-    graphqlPubsub.publish(`notificationArchived:${user._id}`, {
+    graphqlPubsub.publish(`notificationArchived:${subdomain}:${user._id}`, {
       notificationArchived: { userId: user._id, notificationIds },
     });
 
@@ -65,7 +65,7 @@ export const notificationMutations = {
   async markNotificationAsRead(
     _root: undefined,
     { _id }: { _id: string },
-    { models, user }: IContext,
+    { models, user, subdomain }: IContext,
   ) {
     const notification = await models.Notifications.findOne({
       _id,
@@ -79,7 +79,7 @@ export const notificationMutations = {
         { $set: { isRead: true, readAt: new Date() } },
       );
 
-      graphqlPubsub.publish(`notificationRead:${user._id}`, {
+      graphqlPubsub.publish(`notificationRead:${subdomain}:${user._id}`, {
         notificationRead: { userId: user._id, notificationId: _id },
       });
     }
@@ -90,7 +90,7 @@ export const notificationMutations = {
   async markAsReadNotifications(
     _root: undefined,
     { ids, ...filters }: NotificationFilters,
-    { models, user }: IContext,
+    { models, user, subdomain }: IContext,
   ) {
     const filter = {
       ...(ids.length
@@ -110,7 +110,7 @@ export const notificationMutations = {
       },
     );
 
-    graphqlPubsub.publish(`notificationRead:${user._id}`, {
+    graphqlPubsub.publish(`notificationRead:${subdomain}:${user._id}`, {
       notificationRead: { userId: user._id, notificationIds },
     });
 

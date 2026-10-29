@@ -20,6 +20,7 @@ import {
   sendNotifications,
 } from './conversationNotifications';
 import { conversationMessageMutations } from './conversationMessageMutations';
+import { authorizeConversationAction } from '@/inbox/utils/authorizeConversationAction';
 
 export { dispatchConversationToService } from './conversationAutomation';
 export {
@@ -47,8 +48,10 @@ export const conversationMutations = {
       conversationIds,
       assignedUserId,
     }: { conversationIds: string[]; assignedUserId: string },
-    { user, models, subdomain }: IContext,
+    context: IContext,
   ) {
+    await authorizeConversationAction(context, 'conversationsAssign', conversationIds);
+    const { user, models, subdomain } = context;
     const conversations: IConversationDocument[] =
       await models.Conversations.assignUserConversation(
         conversationIds,
@@ -80,8 +83,10 @@ export const conversationMutations = {
   async conversationsUnassign(
     _root,
     { _ids }: { _ids: string[] },
-    { user, models, subdomain }: IContext,
+    context: IContext,
   ) {
+    await authorizeConversationAction(context, 'conversationsUnassign', _ids);
+    const { user, models, subdomain } = context;
     const { oldConversations } = await getConversationById(models, {
       _id: { $in: _ids },
     });
@@ -102,8 +107,10 @@ export const conversationMutations = {
   async conversationsChangeStatus(
     _root,
     { _ids, status }: { _ids: string[]; status: string },
-    { user, models, subdomain }: IContext,
+    context: IContext,
   ) {
+    await authorizeConversationAction(context, 'conversationsChangeStatus', _ids);
+    const { user, models, subdomain } = context;
     await models.Conversations.changeStatusConversation(_ids, status, user._id);
 
     publishConversationsChanged(subdomain, _ids, status);
@@ -123,11 +130,13 @@ export const conversationMutations = {
   async conversationsResolve(
     _root,
     params: { ids: string[] },
-    { user, models }: IContext,
+    context: IContext,
   ) {
     if (!params.ids?.length) {
       throw new Error('conversationIds parameter is required');
     }
+    await authorizeConversationAction(context, 'conversationsResolve', params.ids);
+    const { user, models } = context;
 
     const updateFields = {
       status: CONVERSATION_STATUSES.CLOSED,
@@ -146,8 +155,10 @@ export const conversationMutations = {
   async conversationMarkAsRead(
     _root,
     { _id }: { _id: string },
-    { user, models, subdomain }: IContext,
+    context: IContext,
   ) {
+    await authorizeConversationAction(context, 'showConversations', [_id]);
+    const { user, models, subdomain } = context;
     const conversation = await models.Conversations.markAsReadConversation(
       _id,
       user._id,
@@ -169,8 +180,10 @@ export const conversationMutations = {
   async changeConversationOperator(
     _root,
     { _id, operatorStatus }: { _id: string; operatorStatus: string },
-    { models }: IContext,
+    context: IContext,
   ) {
+    await authorizeConversationAction(context, 'conversationsAssign', [_id]);
+    const { models } = context;
     const message = await models.ConversationMessages.createMessage({
       conversationId: _id,
       botData: [
@@ -202,8 +215,10 @@ export const conversationMutations = {
       reason,
       pausedUntil,
     }: { _id: string; status: string; reason?: string; pausedUntil?: Date },
-    { models, subdomain, user }: IContext,
+    context: IContext,
   ) {
+    await authorizeConversationAction(context, 'conversationMessageAdd', [_id]);
+    const { models, subdomain, user } = context;
     const conversation = await models.Conversations.getConversation(_id);
 
     if (!conversation.automatedReplyControl) {
@@ -245,9 +260,10 @@ export const conversationMutations = {
   async conversationConvertToCard(
     _root,
     params: IConversationConvert,
-    { user, models, subdomain, checkPermission }: IContext,
+    context: IContext,
   ) {
-    await checkPermission('conversationConvertToCard');
+    const { user, models, subdomain, checkPermission } = context;
+    await authorizeConversationAction(context, 'conversationConvertToCard', [params._id]);
 
     return convertConversation(
       { models, subdomain, user, checkPermission },
@@ -266,9 +282,10 @@ export const conversationMutations = {
       propertiesData?: Record<string, unknown>;
       customFieldsData?: Record<string, unknown>;
     },
-    { models, checkPermission }: IContext,
+    context: IContext,
   ) {
-    await checkPermission('conversationEditCustomFields');
+    const { models } = context;
+    await authorizeConversationAction(context, 'conversationEditCustomFields', [_id]);
     if (propertiesData == null && customFieldsData == null) {
       throw new Error('propertiesData or customFieldsData is required');
     }

@@ -1350,6 +1350,11 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
 
 ## Local Invariants
 
+- Staff conversation detail/converted-item reads and state/assignment mutations
+  use `authorizeConversationAction`: check the module action and visibility of
+  every conversation before any read result, write, notification, or provider call.
+  A mixed bulk selection fails as a whole; personal inboxes remain private.
+
 - Outgoing OpenWA requests use a stable request ID as the provider's
   `Idempotency-Key` and as the CRM message ID seed. A retry must retain that ID;
   a changed recipient/body with an already completed ID is rejected. Do not

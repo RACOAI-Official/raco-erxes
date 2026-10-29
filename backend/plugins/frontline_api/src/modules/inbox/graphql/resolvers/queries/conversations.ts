@@ -15,6 +15,7 @@ import { cursorPaginate, markResolvers } from 'erxes-api-shared/utils';
 import { IContext, IModels } from '~/connectionResolvers';
 import QueryBuilder, { IListArgs } from '~/conversationQueryBuilder';
 import { conversationMessageQueries } from '@/inbox/graphql/resolvers/queries/conversationMessages';
+import { authorizeConversationAction } from '@/inbox/utils/authorizeConversationAction';
 
 const count = async (
   models: IModels,
@@ -181,17 +182,19 @@ export const conversationQueries = {
   async conversationDetail(
     _root,
     { _id }: { _id: string },
-    { models }: IContext,
+    context: IContext,
   ) {
-    return models.Conversations.findOne({ _id });
+    await authorizeConversationAction(context, 'showConversations', [_id]);
+    return context.models.Conversations.findOne({ _id });
   },
 
   async conversationConvertedItems(
     _root,
     { _id }: { _id: string },
-    { models, subdomain, checkPermission }: IContext,
+    context: IContext,
   ) {
-    await checkPermission('showConversations');
+    const { models, subdomain } = context;
+    await authorizeConversationAction(context, 'showConversations', [_id]);
 
     return getConversationConvertedItems(models, subdomain, _id);
   },

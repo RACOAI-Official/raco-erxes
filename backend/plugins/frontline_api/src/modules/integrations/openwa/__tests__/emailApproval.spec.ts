@@ -10,7 +10,14 @@ import {
 } from '../emailApproval';
 
 jest.mock('erxes-api-shared/utils', () => ({
-  redis: { set: jest.fn(), get: jest.fn(), eval: jest.fn() },
+  redis: {
+    set: jest.fn(),
+    get: jest.fn(),
+    eval: jest.fn(),
+    zadd: jest.fn(),
+    expire: jest.fn(),
+    zrangebyscore: jest.fn(),
+  },
   sendTRPCMessage: jest.fn(),
 }));
 jest.mock('../outbound', () => ({ composeOpenwaMessage: jest.fn() }));
@@ -23,6 +30,7 @@ jest.mock('../contract', () => ({
 }));
 
 const store = new Map<string, string>();
+const pending = new Map<string, Map<string, number>>();
 const findDraft = jest.fn(),
   approveDraft = jest.fn(),
   findInbox = jest.fn();
@@ -63,11 +71,10 @@ const request = async () => {
     'approver-a',
     'execution-a',
   );
-  const calls = jest.mocked(composeOpenwaMessage).mock.calls;
-  const code = /APPROVE ([A-F0-9]{24})/.exec(
-    calls[calls.length - 1][1].text,
-  )?.[1];
-  if (!code) throw new Error('Missing approval code');
+  const code = [...store.values()].find((value) =>
+    /^[A-F0-9]{24}$/.test(value),
+  );
+  if (!code) throw new Error('Missing internal approval reference');
   return code;
 };
 const changeRequest = (patch: Record<string, unknown>) => {
@@ -82,24 +89,40 @@ const changeRequest = (patch: Record<string, unknown>) => {
 beforeEach(() => {
   jest.clearAllMocks();
   store.clear();
+  pending.clear();
   draft = initial();
   approverPhone = '+8801771222836';
-  jest
-    .mocked(getOpenwaConfig)
-    .mockReturnValue({
-      subdomain: 'tenant-a',
-      integrationId: 'wa-a',
-      sessionId: 'session-a',
-      baseUrl: 'http://localhost',
-      apiKey: 'private',
-      secret: 'private-secret-value',
-    });
+  jest.mocked(getOpenwaConfig).mockReturnValue({
+    subdomain: 'tenant-a',
+    integrationId: 'wa-a',
+    sessionId: 'session-a',
+    baseUrl: 'http://localhost',
+    apiKey: 'private',
+    secret: 'private-secret-value',
+  });
   jest.mocked(redis.set).mockImplementation(async (...args: unknown[]) => {
     const [key, value] = args;
     if (args.includes('NX') && store.has(String(key))) return null;
     store.set(String(key), String(value));
     return 'OK';
   });
+  jest.mocked(redis.zadd).mockImplementation(async (...args: unknown[]) => {
+    const [key, score, member] = args;
+    const values = pending.get(String(key)) || new Map<string, number>();
+    values.set(String(member), Number(score));
+    pending.set(String(key), values);
+    return 1;
+  });
+  jest.mocked(redis.expire).mockResolvedValue(1);
+  jest
+    .mocked(redis.zrangebyscore)
+    .mockImplementation(async (...args: unknown[]) => {
+      const [key, minimum] = args;
+      return [...(pending.get(String(key)) || [])]
+        .filter(([, score]) => score >= Number(minimum))
+        .map(([code]) => code)
+        .slice(0, 101);
+    });
   jest
     .mocked(redis.get)
     .mockImplementation(async (key) => store.get(String(key)) ?? null);
@@ -107,28 +130,25 @@ beforeEach(() => {
     store.delete(String(key));
     return 1;
   });
-  jest
-    .mocked(sendTRPCMessage)
-    .mockImplementation(async () => ({
-      _id: 'approver-a',
-      primaryPhone: approverPhone,
-    }));
+  jest.mocked(sendTRPCMessage).mockImplementation(async () => ({
+    _id: 'approver-a',
+    primaryPhone: approverPhone,
+  }));
   findDraft.mockImplementation(async () => draft);
   findInbox.mockResolvedValue({ address: 'hello@example.test' });
   approveDraft.mockResolvedValue({
     draft: { ...initial(), status: 'sent' },
     message: { deliveryStatus: 'sent' },
   });
-  jest
-    .mocked(composeOpenwaMessage)
-    .mockImplementation(
-      async (_tenant, message) =>
-        ({
-          _id: 'wa-notice',
-          conversationId: 'wa-thread',
-          content: message.text,
-        }) as never,
-    );
+  jest.mocked(composeOpenwaMessage).mockImplementation(
+    async (_tenant, message) =>
+      ({
+        _id: 'wa-notice',
+        conversationId: 'wa-thread',
+        content: message.text,
+        extraData: { openwa: { messageId: 'provider-' + message.requestId } },
+      }) as never,
+  );
 });
 
 test('preview includes recipients, subject and full body but does not send email', async () => {
@@ -322,7 +342,6 @@ test('approval is unavailable until every preview part is accepted', async () =>
   expect(approveDraft).not.toHaveBeenCalled();
 });
 test.each([
-  'APPROVE',
   'approve unknown',
   'please approve',
   'APPROVE 0123456789ABCDEF01234567 extra',
@@ -351,4 +370,137 @@ test.each([
     }),
   ).toBe('invalid');
   expect(approveDraft).not.toHaveBeenCalled();
+});
+
+test.each(['APPROVE', 'approve', ' REJECT '])(
+  'accepts a bare command without a code: %s',
+  async (body) => {
+    await request();
+    expect(
+      await processWhatsAppEmailApproval('tenant-a', models, input(body)),
+    ).toBe(body.trim().toUpperCase() === 'APPROVE' ? 'approved' : 'rejected');
+  },
+);
+
+test('preview never asks the approver to copy an internal reference', async () => {
+  const code = await request();
+  const text = jest.mocked(composeOpenwaMessage).mock.calls[0][1].text;
+  expect(text).toContain('No code needed');
+  expect(text).not.toContain(code);
+});
+
+const secondRequest = async () => {
+  draft = { ...initial(), _id: 'draft-b' };
+  await requestWhatsAppEmailApproval(
+    'tenant-a',
+    models,
+    'draft-b',
+    'approver-a',
+    'execution-b',
+  );
+};
+
+test('bare APPROVE cannot choose among multiple pending emails', async () => {
+  await request();
+  await secondRequest();
+  expect(
+    await processWhatsAppEmailApproval('tenant-a', models, input('APPROVE')),
+  ).toBe('ambiguous');
+  expect(approveDraft).not.toHaveBeenCalled();
+});
+
+test('WhatsApp Reply selects the quoted preview without a code', async () => {
+  await request();
+  await secondRequest();
+  const notification = jest.mocked(composeOpenwaMessage).mock.calls.at(-1)?.[1];
+  const message = {
+    ...input('APPROVE'),
+    quotedMessage: { id: 'provider-' + notification?.requestId },
+  };
+  expect(await processWhatsAppEmailApproval('tenant-a', models, message)).toBe(
+    'approved',
+  );
+  expect(approveDraft).toHaveBeenCalledWith(
+    'draft-b',
+    'tenant-a',
+    expect.any(Object),
+  );
+});
+
+test('an unknown quote never falls back to the sole pending email', async () => {
+  await request();
+  expect(
+    await processWhatsAppEmailApproval('tenant-a', models, {
+      ...input('APPROVE'),
+      quotedMessage: { id: 'unrelated-message' },
+    }),
+  ).toBe('invalid');
+  expect(approveDraft).not.toHaveBeenCalled();
+});
+
+test('redelivered bare approval stays bound to the first request and cannot approve a later email', async () => {
+  await request();
+  const message = input('APPROVE');
+  expect(await processWhatsAppEmailApproval('tenant-a', models, message)).toBe(
+    'approved',
+  );
+  await secondRequest();
+  expect(await processWhatsAppEmailApproval('tenant-a', models, message)).toBe(
+    'approved',
+  );
+  expect(approveDraft).toHaveBeenCalledTimes(1);
+});
+
+test('bare approval is rejected when the configured phone changes', async () => {
+  await request();
+  approverPhone = '+447700900123';
+  expect(
+    await processWhatsAppEmailApproval('tenant-a', models, input('APPROVE')),
+  ).toBe('invalid');
+  expect(approveDraft).not.toHaveBeenCalled();
+});
+
+test('a quoted approval from another phone cannot select the request', async () => {
+  await request();
+  const notification = jest.mocked(composeOpenwaMessage).mock.calls[0][1];
+  const message = {
+    ...input('APPROVE'),
+    from: '447700900123@c.us',
+    chatId: '447700900123@c.us',
+    quotedMessage: { id: 'provider-' + notification.requestId },
+  };
+  expect(await processWhatsAppEmailApproval('tenant-a', models, message)).toBe(
+    'invalid',
+  );
+  expect(approveDraft).not.toHaveBeenCalled();
+});
+
+test('unquoted approval cannot bypass an earlier uncertain delivery to send another email', async () => {
+  await request();
+  changeRequest({ state: 'needs_review' });
+  await secondRequest();
+  expect(
+    await processWhatsAppEmailApproval('tenant-a', models, input('APPROVE')),
+  ).toBe('needs_review');
+  expect(approveDraft).not.toHaveBeenCalled();
+});
+
+test('a command sent before the preview was created cannot approve it', async () => {
+  await request();
+  expect(
+    await processWhatsAppEmailApproval('tenant-a', models, {
+      ...input('APPROVE'),
+      timestamp: Date.now() / 1000 - 10,
+    }),
+  ).toBe('invalid');
+  expect(approveDraft).not.toHaveBeenCalled();
+});
+
+test('webhook parsing retains the quoted provider ID for approval matching', () => {
+  expect(
+    openwaMessage.parse({
+      ...input('APPROVE'),
+      quotedMessage: { id: 'provider-preview', body: 'Preview' },
+    }).quotedMessage?.id,
+  ).toBe('provider-preview');
 });

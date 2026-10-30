@@ -91,12 +91,14 @@ const handleWebhook =
           integrationId: config.integrationId,
         });
         const feedback = {
+          ambiguous:
+            'Several emails await approval. Use WhatsApp Reply on the email preview you want, then type APPROVE or REJECT. No code is needed.',
           approved:
             'Email approved and sent. You can check delivery in the CRM.',
           rejected:
             'Email rejected. It has NOT been sent. The draft remains available for editing.',
           invalid:
-            'Approval is invalid, expired, changed, or not assigned to this phone. Request a new approval. Reply APPROVE <code> or REJECT <code>.',
+            'Approval is invalid, expired, changed, or not assigned to this phone. Request a new approval. Reply APPROVE or REJECT to its approval preview.',
           processing:
             'This approval is already being processed. Please check the CRM before retrying.',
           needs_review:

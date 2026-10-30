@@ -413,7 +413,7 @@
   },
   {
     "name": "Raco AI · Email send — WhatsApp approval",
-    "description": "AI prepares an email draft and sends the full recipient, subject and email preview to the configured WhatsApp approval contact. Reply APPROVE followed by the supplied code to send that exact email, or REJECT followed by the code to keep it unsent. Codes expire after 24 hours. Editing the draft or approval phone invalidates the request. Configure the AI agent, sending inbox and approvalContactId before use. Change the contact phone in Contacts or select another contact. Installation leaves workflows inactive and sends no messages.",
+    "description": "AI prepares an email draft and sends the full recipient, subject and email preview to the configured WhatsApp approval contact. Reply APPROVE to send that exact email, or REJECT to keep it unsent. No code is needed. If several emails await approval, use WhatsApp Reply on the specific preview. Requests expire after 24 hours. Editing the draft or approval phone invalidates the request. Configure the AI agent, sending inbox and approvalContactId before use. Change the contact phone in Contacts or select another contact. Installation leaves workflows inactive and sends no messages.",
     "actions": [
       {
         "id": "c39131c0-e813-4fb4-8c20-beee8e357b47",
@@ -464,7 +464,7 @@
         },
         "config": {
           "customerId": "{{ input.approvalContactId }}",
-          "text": "Request WhatsApp review of the exact email draft. The server supplies its complete preview and secure approval code.",
+          "text": "Request WhatsApp review of the exact email draft. The server supplies its complete preview and approval instructions.",
           "approvalDraftId": "{{ actions.34879859-bec5-4823-879b-da97c838a46f.draftId }}"
         }
       }
@@ -480,7 +480,7 @@
   },
   {
     "name": "Raco AI · Email reply — WhatsApp approval",
-    "description": "AI prepares an email draft and sends the full recipient, subject and email preview to the configured WhatsApp approval contact. Reply APPROVE followed by the supplied code to send that exact email, or REJECT followed by the code to keep it unsent. Codes expire after 24 hours. Editing the draft or approval phone invalidates the request. Configure the AI agent, sending inbox and approvalContactId before use. Change the contact phone in Contacts or select another contact. Installation leaves workflows inactive and sends no messages.",
+    "description": "AI prepares an email draft and sends the full recipient, subject and email preview to the configured WhatsApp approval contact. Reply APPROVE to send that exact email, or REJECT to keep it unsent. No code is needed. If several emails await approval, use WhatsApp Reply on the specific preview. Requests expire after 24 hours. Editing the draft or approval phone invalidates the request. Configure the AI agent, sending inbox and approvalContactId before use. Change the contact phone in Contacts or select another contact. Installation leaves workflows inactive and sends no messages.",
     "actions": [
       {
         "id": "166141e2-5230-49b2-baf9-45f6ade95e93",
@@ -526,7 +526,7 @@
         },
         "config": {
           "customerId": "{{ input.approvalContactId }}",
-          "text": "Request WhatsApp review of the exact email draft. The server supplies its complete preview and secure approval code.",
+          "text": "Request WhatsApp review of the exact email draft. The server supplies its complete preview and approval instructions.",
           "approvalDraftId": "{{ actions.1d23387d-9322-4294-be5f-1ee13c2bd384.draftId }}"
         }
       }

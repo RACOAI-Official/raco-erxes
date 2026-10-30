@@ -163,7 +163,7 @@ test('does not process unrelated events', async () => {
 
 test('signed approval bypasses LLM and automation dispatch', async () => {
   const body = request();
-  body.data.body = 'APPROVE 0123456789ABCDEF01234567';
+  body.data.body = 'APPROVE';
   jest.mocked(receiveOpenwaMessage).mockResolvedValue('approval-message');
   jest.mocked(generateModels).mockResolvedValue({
     Conversations: { findOne: jest.fn().mockResolvedValue(null) },

@@ -1019,7 +1019,7 @@ to, bouncedRecipients, retryable, canRetry }` for its delivery state;
 
 ## Local Invariants
 
-- Email approval through WhatsApp uses explicit draft/contact bindings, a tenant/integration/phone-bound 24-hour code and an immutable email snapshot. Only exact APPROVE/REJECT commands bypass AI handling. Never let an LLM decide approval, let edited drafts reuse old approvals, or retry uncertain email delivery automatically. The contact phone remains editable; changing it invalidates pending requests.
+- Email approval through WhatsApp uses explicit draft/contact bindings, an internal tenant/integration/phone-bound 24-hour reference and an immutable email snapshot. Only exact APPROVE/REJECT commands bypass AI handling. Never let an LLM decide approval, let edited drafts reuse old approvals, or retry uncertain email delivery automatically. The contact phone remains editable; changing it invalidates pending requests.
 
 
 - Internal-note sends derive mentioned recipient IDs from the submitted editor
@@ -2709,3 +2709,5 @@ null }`, fall back to the route pipeline and skip without one; never pass
 - **Affected areas:** `src/modules/integrations/telegram`, inbox provider metadata, composer hooks, message actions and integration menus.
 - # **Contracts changed:** Adds the Telegram integration kind and optional message metadata; consumes the existing canonical reply mutation with Telegram provider IDs.
   > > > > > > > b5737b8f9a6f3d229cf63081569bfebc7196a29c
+
+- WhatsApp email approvals accept bare APPROVE/REJECT. Match a quoted preview by its authenticated provider message ID; an unquoted command requires exactly one ready pending request. Unknown quotes and multiple requests must never select a fallback draft. Persist inbound command-to-request bindings so redelivery cannot approve a later email. Internal references are never required in the user reply.

@@ -24,6 +24,7 @@ const requestSchema = z.object({
   contactId: z.string(),
   phone: z.string(),
   hash: z.string(),
+  createdAt: z.number().optional(),
   expiresAt: z.number(),
   ready: z.boolean(),
   state: z.enum([
@@ -43,9 +44,9 @@ const keyFor = (subdomain: string, integrationId: string, code: string) =>
 export const isEmailApprovalCommand = (text: string) =>
   /^\s*(APPROVE|REJECT)\b/i.test(text);
 export const parseEmailApprovalCommand = (text: string) => {
-  const match = /^\s*(APPROVE|REJECT)\s+([A-F0-9]{24})\s*$/i.exec(text);
+  const match = /^\s*(APPROVE|REJECT)(?:\s+([A-F0-9]{24}))?\s*$/i.exec(text);
   return match
-    ? { decision: match[1].toUpperCase(), code: match[2].toUpperCase() }
+    ? { decision: match[1].toUpperCase(), code: match[2]?.toUpperCase() }
     : null;
 };
 
@@ -73,6 +74,15 @@ export const approvalHash = (draft: IMailDraft, sender: string) =>
       }),
     )
     .digest('hex');
+
+const pendingKey = (tenant: string, integration: string, recipient: string) =>
+  openwaId('email-approval-pending', tenant, integration, recipient);
+const quoteKey = (
+  tenant: string,
+  integration: string,
+  recipient: string,
+  id: string,
+) => openwaId('email-approval-quote', tenant, integration, recipient, id);
 
 const contactPhone = async (subdomain: string, contactId: string) => {
   const result: unknown = await sendTRPCMessage({
@@ -116,7 +126,7 @@ const chunks = (text: string) => {
   return result;
 };
 
-/** Email is never sent here: the exact draft is presented before a code becomes valid. */
+/** Email is never sent here: the exact draft is presented before its internal approval reference becomes valid. */
 export const requestWhatsAppEmailApproval = async (
   subdomain: string,
   models: IModels,
@@ -157,6 +167,7 @@ export const requestWhatsAppEmailApproval = async (
         contactId,
         phone: approverPhone,
         hash,
+        createdAt: Date.now(),
         expiresAt: Date.now() + TTL * 1000,
         state: 'pending',
         ready: false,
@@ -187,7 +198,7 @@ export const requestWhatsAppEmailApproval = async (
   for (let index = 0; index < parts.length; index++) {
     const instructions =
       index === parts.length - 1
-        ? `\n\nReply APPROVE ${code} to send this exact email, or REJECT ${code} to keep it unsent. Expires in 24 hours. Editing the draft or changing the approval phone cancels this approval.`
+        ? `\n\nReply APPROVE to send this exact email, or REJECT to keep it unsent. No code needed. If several emails await approval, use WhatsApp Reply on this message. Expires in 24 hours. Editing the draft or changing the approval phone cancels this approval.`
         : '';
     message = await composeOpenwaMessage(
       subdomain,
@@ -198,7 +209,30 @@ export const requestWhatsAppEmailApproval = async (
       },
       { fromBot: true },
     );
+    const provider = z
+      .object({ openwa: z.object({ messageId: z.string().min(1) }) })
+      .parse(message.extraData);
+    await redis.set(
+      quoteKey(
+        subdomain,
+        config.integrationId,
+        approverPhone,
+        provider.openwa.messageId,
+      ),
+      code,
+      'EX',
+      TTL,
+    );
   }
+  await redis.zadd(
+    pendingKey(subdomain, config.integrationId, approverPhone),
+    request.expiresAt,
+    code,
+  );
+  await redis.expire(
+    pendingKey(subdomain, config.integrationId, approverPhone),
+    TTL * 2,
+  );
   request.ready = true;
   await redis.set(key, JSON.stringify(request), 'EX', TTL);
   if (!message) throw new Error('Approval preview was not sent');
@@ -207,6 +241,7 @@ export const requestWhatsAppEmailApproval = async (
 
 export type EmailApprovalState =
   | 'invalid'
+  | 'ambiguous'
   | 'processing'
   | 'approved'
   | 'rejected'
@@ -230,7 +265,75 @@ export const processWhatsAppEmailApproval = async (
     return 'invalid';
   const config = getOpenwaConfig();
   if (config.subdomain !== subdomain) return 'invalid';
-  const key = keyFor(subdomain, config.integrationId, command.code);
+  const actualPhone = phone(openwaPhone(message) || '');
+  if (!/^[1-9]\d{6,14}$/.test(actualPhone)) return 'invalid';
+  const deliveryKey = openwaId(
+    'email-approval-command',
+    subdomain,
+    config.integrationId,
+    actualPhone,
+    message.id,
+  );
+  let code = await redis.get(deliveryKey);
+  if (!code) {
+    code = command.code || null;
+    if (!code && message.quotedMessage) {
+      code = await redis.get(
+        quoteKey(
+          subdomain,
+          config.integrationId,
+          actualPhone,
+          message.quotedMessage.id,
+        ),
+      );
+      if (!code) return 'invalid'; // Never fall back from an unknown quote to another draft.
+    }
+    if (!code) {
+      const candidates = await redis.zrangebyscore(
+        pendingKey(subdomain, config.integrationId, actualPhone),
+        Date.now(),
+        '+inf',
+        'LIMIT',
+        0,
+        101,
+      );
+      if (candidates.length > 100) return 'ambiguous';
+      const pending: string[] = [];
+      for (const candidate of candidates) {
+        const raw = await redis.get(
+          keyFor(subdomain, config.integrationId, candidate),
+        );
+        if (!raw) continue;
+        let value: unknown;
+        try {
+          value = JSON.parse(raw);
+        } catch {
+          continue;
+        }
+        const found = requestSchema.safeParse(value);
+        if (!found.success) continue;
+        const request = found.data;
+        if (
+          request.subdomain !== subdomain ||
+          request.integrationId !== config.integrationId ||
+          request.phone !== actualPhone ||
+          !request.ready ||
+          request.expiresAt <= Date.now()
+        )
+          continue;
+        if (request.state === 'processing' || request.state === 'needs_review')
+          return 'needs_review';
+        if (request.state === 'pending') pending.push(candidate);
+      }
+      if (pending.length > 1) return 'ambiguous';
+      if (pending.length !== 1) return 'invalid';
+      code = pending[0];
+    }
+    await redis.set(deliveryKey, code, 'EX', TTL * 2, 'NX');
+    code = await redis.get(deliveryKey);
+  }
+  if (!code || !/^[A-F0-9]{24}$/.test(code)) return 'invalid';
+  const key = keyFor(subdomain, config.integrationId, code);
   const lock = `${key}:lock`;
   const token = randomUUID();
   if ((await redis.set(lock, token, 'PX', 120000, 'NX')) !== 'OK')
@@ -247,7 +350,6 @@ export const processWhatsAppEmailApproval = async (
     const parsed = requestSchema.safeParse(value);
     if (!parsed.success) return 'invalid';
     const request = parsed.data;
-    const actualPhone = phone(openwaPhone(message) || '');
     const chatPhone = /^(\d+)@(c\.us|s\.whatsapp\.net)$/.exec(
       message.chatId,
     )?.[1];
@@ -256,6 +358,8 @@ export const processWhatsAppEmailApproval = async (
       request.integrationId !== config.integrationId ||
       request.expiresAt <= Date.now() ||
       !request.ready ||
+      (request.createdAt !== undefined &&
+        message.timestamp * 1000 + 1000 < request.createdAt) ||
       actualPhone !== request.phone ||
       (chatPhone && chatPhone !== actualPhone) ||
       (await contactPhone(subdomain, request.contactId)) !== request.phone

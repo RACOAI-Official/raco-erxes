@@ -525,7 +525,7 @@ export const inboxAutomationWorkers = {
           conversationId: target.conversationId,
           customerId: target.customerId,
           targetId: target._id,
-          findConversation: (id) => models.Conversations.findOne({
+          findConversation: async (id) => models.Conversations.findOne({
             _id: id, integrationId: config.integrationId,
           }),
         });

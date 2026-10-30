@@ -46,6 +46,7 @@ export const types = `
   `;
 
 export const queries = `
+    widgetsSurveySelection(integrationId: String!, conversationId: String!, messageId: String!, token: String!): JSON
     widgetsConversations(integrationId: String!, customerId: String, visitorId: String): [Conversation]
     widgetsConversationDetail(_id: String, integrationId: String!): ConversationDetailResponse
    
@@ -63,6 +64,7 @@ export const queries = `
     `;
 
 export const mutations = `
+    widgetsSurveyVote(integrationId: String!, conversationId: String!, messageId: String!, token: String!, optionIds: [String!]!): ConversationMessage
     widgetsMessengerConnect(
       integrationId: String!
       email: String

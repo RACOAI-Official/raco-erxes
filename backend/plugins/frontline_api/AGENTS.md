@@ -61,6 +61,17 @@
 
 ## Current Capabilities
 
+- Native Messenger survey voting uses a random 30-day capability issued only in
+  the response that creates a new conversation. Redis stores its hash, bound to
+  tenant, integration and conversation. Never mint or reveal a capability from
+  a conversation read, reconnect or caller-supplied customer/visitor ID. Votes
+  validate the public survey message, current survey status, expiry and every
+  step before updating the existing per-message vote ledger and tallies.
+  Old conversations without a browser capability must start a new conversation
+  to vote. The transient `ConversationMessage.widgetSurveyToken` is never stored
+  on messages or broadcast through subscriptions.
+
+
 - The server-managed `POST /openwa/ai-reply` endpoint authenticates the same
   OpenWA HMAC and pinned session as `/receive`, stores the inbound message without
   enqueueing an automation, then calls a separately configured text-only LLM and

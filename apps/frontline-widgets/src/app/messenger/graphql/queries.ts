@@ -44,6 +44,7 @@ const GET_CONVERSATION_DETAIL = gql`
         createdAt
         fromBot
         contentType
+        extraData
         botData
         internal
       }

@@ -310,7 +310,7 @@ export const userMutations: Record<string, Resolver<any, any, IContext>> = {
     }: {
       entries: Array<{
         email: string;
-        password: string;
+        password?: string;
         permissionGroupIds?: string[];
       }>;
     },
@@ -333,24 +333,17 @@ export const userMutations: Record<string, Resolver<any, any, IContext>> = {
     }
 
     for (const entry of entries) {
-      await models.Users.checkDuplication({ email: entry.email });
+      const email = entry.email.trim().toLowerCase();
+      await models.Users.checkDuplication({ email });
+      const token = await models.Users.invite({ ...entry, email });
 
-      const doc: any = entry;
-
-      const docModified = doc;
-
-      if (docModified?.scopeBrandIds?.length) {
-        doc.brandIds = docModified.scopeBrandIds;
-      }
-
-      const token = await models.Users.invite(doc);
-
-      sendInvitationEmail(models, subdomain, {
-        email: entry.email,
+      await sendInvitationEmail(models, subdomain, {
+        email,
         token,
         userId: user._id,
       });
     }
+    return true;
   },
 
   /*
@@ -359,9 +352,17 @@ export const userMutations: Record<string, Resolver<any, any, IContext>> = {
   async usersResendInvitation(
     _parent: undefined,
     { email }: { email: string },
-    { models }: IContext,
+    { models, subdomain, user, checkPermission }: IContext,
   ) {
-    const token = await models.Users.resendInvitation({ email });
+    await checkPermission('teamMembersInvite');
+    const address = email.trim().toLowerCase();
+    const token = await models.Users.resendInvitation({ email: address });
+
+    await sendInvitationEmail(models, subdomain, {
+      email: address,
+      token,
+      userId: user._id,
+    });
 
     return token;
   },

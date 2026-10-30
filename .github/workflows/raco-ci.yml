@@ -50,6 +50,8 @@ jobs:
           pnpm exec jest --config apps/frontline-widgets/jest.config.cjs --runInBand
       - name: Build Messenger widgets
         run: pnpm nx build frontline-widgets
+      - name: Team member invitation delivery regression tests
+        run: pnpm exec jest --config backend/core-api/src/modules/organization/team-member/jest.config.cjs --runInBand
       - name: Router and AI failover regression tests
         run: pnpm exec tsx --test backend/gateway/src/apollo-router/__tests__/windows-router.spec.ts backend/services/automations/src/ai/bridge/__tests__/racoFallback.spec.ts
       - name: Record existing project lint debt

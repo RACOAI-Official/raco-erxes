@@ -1365,6 +1365,8 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
   use `authorizeConversationAction`: check the module action and visibility of
   every conversation before any read result, write, notification, or provider call.
   A mixed bulk selection fails as a whole; personal inboxes remain private.
+- Client-portal ticket data and notes require a signed-in portal user whose portal matches the app token. Derive ticket authors from the session; never trust a caller-supplied createdBy filter. Enforce ownership before ticket reads, updates, or notes, including count queries.
+
 
 - Outgoing OpenWA requests use a stable request ID as the provider's
   `Idempotency-Key` and as the CRM message ID seed. A retry must retain that ID;

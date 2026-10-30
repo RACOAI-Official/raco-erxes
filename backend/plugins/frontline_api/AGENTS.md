@@ -89,7 +89,7 @@
   pending draft without delivery; it requires send permission and inbox access.
   Draft automation config `mode: compose` accepts inbox, recipient, subject and
   content bindings. Reply workflows continue to use the existing draft action.
-  Only authenticated `mailDraftApprove` sends these drafts.
+  Authenticated `mailDraftApprove` or an exact phone-bound WhatsApp approval sends these drafts.
 
 - Operator-managed Mailcow inboxes use native kind `mail` with creation data
   `{provider: 'mailcow'}`. Server configuration pins `MAILCOW_SUBDOMAIN` and
@@ -1361,6 +1361,12 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
 
 ## Local Invariants
 
+- Email approval through WhatsApp uses explicit draft/contact bindings, an internal tenant/integration/phone-bound 24-hour reference and an immutable email snapshot. Only exact APPROVE/REJECT commands bypass AI handling. Never let an LLM decide approval, let edited drafts reuse old approvals, or retry uncertain email delivery automatically. The contact phone remains editable; changing it invalidates pending requests.
+
+
+- WhatsApp actions with an explicit recipient binding may notify a selected approval contact from mail/customer triggers. A configured binding that resolves empty or remains a placeholder must fail closed, never fall back to the triggering customer. Reply-mode actions still verify the configured WhatsApp conversation. Approval notifications only link to the authenticated CRM draft review; they never authorize email delivery.
+
+
 - Staff conversation detail/converted-item reads and state/assignment mutations
   use `authorizeConversationAction`: check the module action and visibility of
   every conversation before any read result, write, notification, or provider call.
@@ -1664,3 +1670,5 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
 - **Summary:** Adds Telegram setup, webhook ingestion and replies through the existing provider dispatcher and inbox persistence flow.
 - **Affected areas:** `src/modules/integrations/telegram`, inbox provider dispatch, model registration and routes.
 - **Contracts changed:** Telegram bot lifecycle/status GraphQL and `/telegram/receive/:_id`; provider metadata uses `extraData.telegram`.
+
+- WhatsApp email approvals accept bare APPROVE/REJECT. Match a quoted preview by its authenticated provider message ID; an unquoted command requires exactly one ready pending request. Unknown quotes and multiple requests must never select a fallback draft. Persist inbound command-to-request bindings so redelivery cannot approve a later email. Internal references are never required in the user reply.

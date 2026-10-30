@@ -19,6 +19,10 @@ export const openwaMessage = z.object({
   isGroup: z.boolean(),
   isStatusBroadcast: z.boolean().optional(),
   senderPhone: z.string().nullable().optional(),
+  quotedMessage: z
+    .object({ id: z.string().min(1).max(512) })
+    .passthrough()
+    .optional(),
   contact: z
     .object({
       name: z.string().max(256).optional(),

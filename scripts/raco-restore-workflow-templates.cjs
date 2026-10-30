@@ -7,8 +7,23 @@ const args = process.argv.slice(2);
 const value = (flag) => args[args.indexOf(flag) + 1];
 
 function validateCatalog() {
-  assert.equal(templates.length, 9);
-  assert.equal(new Set(templates.map(t => t.name)).size, 9);
+  assert.equal(templates.length, 11);
+  assert.equal(new Set(templates.map(t => t.name)).size, 11);
+  for (const t of templates.filter(t => t.name.endsWith('WhatsApp approval'))) {
+    assert.equal(t.actions.length, 3);
+    const [ai, draft, notice] = t.actions;
+    assert.equal(ai.type, 'aiAgent');
+    assert.equal(ai.nextActionId, draft.id);
+    assert.equal(draft.type, 'frontline:mail.drafts.create');
+    assert.equal(draft.nextActionId, notice.id);
+    assert.equal(notice.type, 'frontline:inbox.openwaMessages.create');
+    assert.equal(notice.config.customerId, '{{ input.approvalContactId }}');
+    assert.equal(notice.config.approvalDraftId, '{{ actions.' + draft.id + '.draftId }}');
+    assert(t.description.includes('APPROVE'));
+    assert(t.description.includes('REJECT'));
+    assert(!notice.nextActionId);
+    assert.equal(t.inputs.approvalContactId, '', 'No tenant-specific approval contacts in portable templates');
+  }
   const allowed = new Set(['delay', 'aiAgent', 'frontline:mail.drafts.create', 'frontline:inbox.openwaMessages.create']);
   for (const t of templates) {
     const ids = new Set(t.actions.map(a => a.id));
@@ -24,7 +39,7 @@ function validateCatalog() {
 async function main() {
   validateCatalog();
   if (args.includes('--check')) {
-    console.log('PASS: 9 templates; valid action chains; email drafts only; no embedded agent IDs.');
+    console.log('PASS: 11 templates; valid action chains; email drafts only; no embedded agent IDs.');
     return;
   }
   if (!args.includes('--api-url') || !args.includes('--credentials-file')) {

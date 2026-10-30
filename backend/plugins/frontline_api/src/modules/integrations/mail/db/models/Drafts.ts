@@ -6,6 +6,7 @@ import {
   IMailDraftDocument,
   IMailDraftEdit,
   IMailDraftInput,
+  IMailDraftApprovalSnapshot,
 } from '@/integrations/mail/@types/draft';
 import { IMailMessageDocument } from '@/integrations/mail/@types/message';
 import {
@@ -25,6 +26,7 @@ export interface IMailDraftModel extends Model<IMailDraftDocument> {
   approveDraft(
     _id: string,
     subdomain: string,
+    expectedSnapshot?: IMailDraftApprovalSnapshot,
   ): Promise<{ draft: IMailDraftDocument; message: IMailMessageDocument }>;
 }
 
@@ -124,8 +126,12 @@ export const loadMailDraftClass = (models: IModels) => {
       return removed ?? Draft.explainUnavailable(_id, 'discarded');
     }
 
-    public static async approveDraft(_id: string, subdomain: string) {
-      const draft = await Draft.claimForSending(_id);
+    public static async approveDraft(
+      _id: string,
+      subdomain: string,
+      expectedSnapshot?: IMailDraftApprovalSnapshot,
+    ) {
+      const draft = await Draft.claimForSending(_id, expectedSnapshot);
 
       const earlier = await models.MailMessages.findOne({
         draftId: draft._id,
@@ -203,15 +209,22 @@ export const loadMailDraftClass = (models: IModels) => {
       return models.MailMessages.retrySend(earlier._id, subdomain);
     }
 
-    private static async claimForSending(_id: string) {
+    private static async claimForSending(
+      _id: string,
+      expectedSnapshot?: IMailDraftApprovalSnapshot,
+    ) {
       const now = new Date();
 
       const claimed = await models.MailDrafts.findOneAndUpdate(
-        actionableDraftFilter(_id, now.getTime()),
+        { ...actionableDraftFilter(_id, now.getTime()), ...expectedSnapshot },
         { $set: { status: MAIL_DRAFT_STATUSES.SENDING, updatedAt: now } },
         { new: true },
       );
 
+      if (!claimed && expectedSnapshot)
+        throw new Error(
+          'The email draft changed or is no longer awaiting approval',
+        );
       return claimed ?? Draft.explainUnavailable(_id, 'sent');
     }
 

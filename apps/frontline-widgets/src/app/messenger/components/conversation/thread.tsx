@@ -1,3 +1,4 @@
+import { WidgetSurvey } from '../widget-survey';
 import { useMemo } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { cn } from 'erxes-ui';
@@ -116,6 +117,16 @@ export function ConversationThread({
 
                   if (isCustomerJoined(message)) {
                     return null;
+                  }
+
+                  if (message.extraData?.survey) {
+                    return (
+                      <WidgetSurvey
+                        key={message._id}
+                        message={message}
+                        survey={message.extraData.survey}
+                      />
+                    );
                   }
 
                   if (isBotMessage(message)) {

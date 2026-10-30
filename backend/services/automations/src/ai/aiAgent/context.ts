@@ -1,5 +1,5 @@
 import path from 'path';
-import { readFileFromStorage } from 'erxes-api-shared/utils';
+import { readAiContextFile } from './readContextFile';
 import {
   AI_AGENT_LIMITS,
   AI_AGENT_SUPPORTED_CONTEXT_FILE_EXTENSIONS,
@@ -75,7 +75,7 @@ export const loadAiAgentContextFiles = async (
     }
 
     try {
-      const buffer = await readFileFromStorage({
+      const buffer = await readAiContextFile({
         subdomain,
         key: file.key,
       });

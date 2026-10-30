@@ -61,6 +61,17 @@
 
 ## Current Capabilities
 
+- Native Messenger survey voting uses a random 30-day capability issued only in
+  the response that creates a new conversation. Redis stores its hash, bound to
+  tenant, integration and conversation. Never mint or reveal a capability from
+  a conversation read, reconnect or caller-supplied customer/visitor ID. Votes
+  validate the public survey message, current survey status, expiry and every
+  step before updating the existing per-message vote ledger and tallies.
+  Old conversations without a browser capability must start a new conversation
+  to vote. The transient `ConversationMessage.widgetSurveyToken` is never stored
+  on messages or broadcast through subscriptions.
+
+
 - The server-managed `POST /openwa/ai-reply` endpoint authenticates the same
   OpenWA HMAC and pinned session as `/receive`, stores the inbound message without
   enqueueing an automation, then calls a separately configured text-only LLM and
@@ -70,6 +81,9 @@
   Do not use this endpoint alongside another automatic reply workflow.
   Both OpenWA webhook routes share a 240-request/minute process budget before
   HMAC validation; keep this limiter when adding handlers or changing proxies.
+  Dedicated replies preserve the authenticated inbound chat ID, including @lid,
+  and verify its saved conversation belongs to the contact and integration.
+  Phone-based composition remains separate; never treat an @lid as a phone.
 
 - `frontlineMailComposeDraft` creates a contact-linked email conversation and
   pending draft without delivery; it requires send permission and inbox access.
@@ -1346,6 +1360,13 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
   tenant, integration and chat, with topic identity included where applicable.
 
 ## Local Invariants
+
+- Staff conversation detail/converted-item reads and state/assignment mutations
+  use `authorizeConversationAction`: check the module action and visibility of
+  every conversation before any read result, write, notification, or provider call.
+  A mixed bulk selection fails as a whole; personal inboxes remain private.
+- Client-portal ticket data and notes require a signed-in portal user whose portal matches the app token. Derive ticket authors from the session; never trust a caller-supplied createdBy filter. Enforce ownership before ticket reads, updates, or notes, including count queries.
+
 
 - Outgoing OpenWA requests use a stable request ID as the provider's
   `Idempotency-Key` and as the CRM message ID seed. A retry must retain that ID;

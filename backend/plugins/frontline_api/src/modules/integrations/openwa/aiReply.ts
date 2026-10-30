@@ -225,6 +225,7 @@ export const receiveOpenwaAiReply = async (
         requestId: openwaId('ai-reply', config.integrationId, message.id),
       },
       { fromBot: true },
+      { chatId: message.chatId, conversationId },
     );
     await models.ConversationMessages.updateOne(
       { _id: messageId },

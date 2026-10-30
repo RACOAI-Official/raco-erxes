@@ -44,6 +44,12 @@ jobs:
         run: |
           pnpm nx test erxes-api-shared --runInBand
           pnpm nx test core-ui --runInBand
+      - name: Native Messenger survey regression tests
+        run: |
+          pnpm exec jest --config backend/plugins/frontline_api/jest.config.ts --runInBand --runTestsByPath backend/plugins/frontline_api/src/modules/survey/widgetVoting.spec.ts
+          pnpm exec jest --config apps/frontline-widgets/jest.config.cjs --runInBand
+      - name: Build Messenger widgets
+        run: pnpm nx build frontline-widgets
       - name: Router and AI failover regression tests
         run: pnpm exec tsx --test backend/gateway/src/apollo-router/__tests__/windows-router.spec.ts backend/services/automations/src/ai/bridge/__tests__/racoFallback.spec.ts
       - name: Record existing project lint debt
@@ -62,6 +68,10 @@ jobs:
         run: pnpm nx build frontline_ui
       - name: Build sales UI
         run: pnpm nx build sales_ui
+      - name: Build Frontline public widgets
+        env:
+          REACT_APP_WIDGETS_BASE_PATH: /widgets
+        run: pnpm nx build frontline-widgets
       - name: Package corresponding source and build branded UI
         run: |
           pnpm source:raco
@@ -91,6 +101,7 @@ jobs:
             dist/frontend/plugins/operation_ui/
             dist/frontend/plugins/frontline_ui/
             dist/frontend/plugins/sales_ui/
+            dist/apps/frontline-widgets/
       - name: Validation scope
         if: always()
         run: |

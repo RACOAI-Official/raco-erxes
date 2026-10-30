@@ -87,6 +87,7 @@ export const types = `
   }
 
   type ConversationMessage {
+    widgetSurveyToken: String
     _id: String!
     content: String
     attachments: [Attachment]

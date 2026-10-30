@@ -89,7 +89,7 @@
   pending draft without delivery; it requires send permission and inbox access.
   Draft automation config `mode: compose` accepts inbox, recipient, subject and
   content bindings. Reply workflows continue to use the existing draft action.
-  Only authenticated `mailDraftApprove` sends these drafts.
+  Authenticated `mailDraftApprove` or an exact phone-bound WhatsApp approval sends these drafts.
 
 - Operator-managed Mailcow inboxes use native kind `mail` with creation data
   `{provider: 'mailcow'}`. Server configuration pins `MAILCOW_SUBDOMAIN` and
@@ -1360,6 +1360,9 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
   tenant, integration and chat, with topic identity included where applicable.
 
 ## Local Invariants
+
+- Email approval through WhatsApp uses explicit draft/contact bindings, a tenant/integration/phone-bound 24-hour code and an immutable email snapshot. Only exact APPROVE/REJECT commands bypass AI handling. Never let an LLM decide approval, let edited drafts reuse old approvals, or retry uncertain email delivery automatically. The contact phone remains editable; changing it invalidates pending requests.
+
 
 - WhatsApp actions with an explicit recipient binding may notify a selected approval contact from mail/customer triggers. A configured binding that resolves empty or remains a placeholder must fail closed, never fall back to the triggering customer. Reply-mode actions still verify the configured WhatsApp conversation. Approval notifications only link to the authenticated CRM draft review; they never authorize email delivery.
 

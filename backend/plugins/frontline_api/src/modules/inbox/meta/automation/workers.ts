@@ -1,3 +1,4 @@
+import { requestWhatsAppEmailApproval } from '@/integrations/openwa/emailApproval';
 import { resolveOpenwaAutomationRecipient } from './openwaRecipient';
 import { toAiMemoryScopes } from './aiMemoryScopes';
 import { composeOpenwaMessage } from '@/integrations/openwa/outbound';
@@ -529,6 +530,17 @@ export const inboxAutomationWorkers = {
             _id: id, integrationId: config.integrationId,
           }),
         });
+        if (action.config?.approvalDraftId) {
+          if (typeof action.config.customerId !== 'string' || !action.config.customerId.trim()) {
+            throw new Error('Choose an explicit email approval contact');
+          }
+          if (typeof values.approvalDraftId !== 'string' || !values.approvalDraftId.trim() || /\{\{/.test(values.approvalDraftId)) {
+            throw new Error('Choose the email draft requiring approval');
+          }
+          const approval = await requestWhatsAppEmailApproval(subdomain, models, values.approvalDraftId,
+            customerId, openwaId(String(execution._id), action.id));
+          return { result: { _id: approval._id, conversationId: approval.conversationId, content: approval.content } };
+        }
         if (typeof values.text !== 'string') throw new Error('Enter WhatsApp message text');
         const message = await composeOpenwaMessage(subdomain, {
           customerId, text: values.text, requestId: openwaId(String(execution._id), action.id),

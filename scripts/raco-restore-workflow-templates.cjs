@@ -18,8 +18,9 @@ function validateCatalog() {
     assert.equal(draft.nextActionId, notice.id);
     assert.equal(notice.type, 'frontline:inbox.openwaMessages.create');
     assert.equal(notice.config.customerId, '{{ input.approvalContactId }}');
-    assert(notice.config.text.includes('The email has NOT been sent'));
-    assert(notice.config.text.includes('Replying APPROVE on WhatsApp does not send email'));
+    assert.equal(notice.config.approvalDraftId, '{{ actions.' + draft.id + '.draftId }}');
+    assert(t.description.includes('APPROVE'));
+    assert(t.description.includes('REJECT'));
     assert(!notice.nextActionId);
     assert.equal(t.inputs.approvalContactId, '', 'No tenant-specific approval contacts in portable templates');
   }

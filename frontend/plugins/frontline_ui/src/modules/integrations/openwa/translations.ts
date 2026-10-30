@@ -9,6 +9,8 @@ const en = {
   sent: 'WhatsApp message sent',
   sendFailed: 'WhatsApp message could not be sent',
   messageRequired: 'Enter a WhatsApp message',
+  approvalDraft: 'Email draft for WhatsApp approval (optional)',
+  approvalHelp: 'Bind the preceding draft ID to send the complete email for review. Only the configured contact can reply APPROVE or REJECT with its unique code. Draft changes invalidate approval. Leave empty for an ordinary message.',
   recipientBinding: 'Recipient binding (optional)',
   recipientHelp:
     'Leave empty to reply to the triggering WhatsApp contact. For a compose workflow, bind the selected CRM contact, for example {{ input.customerId }}.',

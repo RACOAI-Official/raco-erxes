@@ -1019,6 +1019,9 @@ to, bouncedRecipients, retryable, canRetry }` for its delivery state;
 
 ## Local Invariants
 
+- Email approval through WhatsApp uses explicit draft/contact bindings, a tenant/integration/phone-bound 24-hour code and an immutable email snapshot. Only exact APPROVE/REJECT commands bypass AI handling. Never let an LLM decide approval, let edited drafts reuse old approvals, or retry uncertain email delivery automatically. The contact phone remains editable; changing it invalidates pending requests.
+
+
 - Internal-note sends derive mentioned recipient IDs from the submitted editor
   blocks. Restored drafts must notify their actual mentions, and deleted mentions
   must not leave stale recipients in a cached composer state.

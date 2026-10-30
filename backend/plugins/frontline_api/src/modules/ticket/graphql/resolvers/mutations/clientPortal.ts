@@ -1,3 +1,7 @@
+import {
+  portalTicketAuthor,
+  requirePortalTicket,
+} from '@/ticket/utils/portalAccess';
 import { Resolver } from 'erxes-api-shared/core-types';
 import {
   graphqlPubsub,
@@ -12,9 +16,10 @@ export const cpTicketMutations: Record<string, Resolver> = {
   cpCreateTicket: async (
     _parent: undefined,
     params: ITicketUpdate,
-    { models, subdomain, cpUser, clientPortal }: IContext,
+    context: IContext,
   ) => {
-    const userId = cpUser?.erxesCustomerId || cpUser?._id || clientPortal?._id;
+    const { models, subdomain, cpUser } = context;
+    const userId = portalTicketAuthor(context).slice(3);
 
     const ticket = await models.Ticket.addTicket(
       params,
@@ -77,12 +82,14 @@ export const cpTicketMutations: Record<string, Resolver> = {
   cpUpdateTicket: async (
     _parent: undefined,
     params: ITicketUpdate,
-    { models, cpUser, clientPortal, subdomain }: IContext,
+    context: IContext,
   ) => {
-    const userId = cpUser.erxesCustomerId || cpUser._id || clientPortal._id;
+    const { models, subdomain } = context;
+    await requirePortalTicket(context, params._id);
+    const userId = portalTicketAuthor(context).slice(3);
 
     return await models.Ticket.updateTicket({
-      doc: params,
+      doc: { ...params, createdBy: `cp:${userId}` },
       userId: `cp:${userId}`,
       subdomain,
     });
@@ -91,9 +98,11 @@ export const cpTicketMutations: Record<string, Resolver> = {
   cpTicketCreateNote: async (
     _parent: undefined,
     { content, contentId },
-    { models, cpUser, clientPortal, subdomain }: IContext,
+    context: IContext,
   ) => {
-    const userId = cpUser?.erxesCustomerId || cpUser?._id || clientPortal?._id;
+    const { models, subdomain } = context;
+    await requirePortalTicket(context, contentId);
+    const userId = portalTicketAuthor(context).slice(3);
 
     return models.Note.createNote({
       doc: {

@@ -50,14 +50,11 @@ jobs:
           pnpm exec jest --config apps/frontline-widgets/jest.config.cjs --runInBand
       - name: Build Messenger widgets
         run: pnpm nx build frontline-widgets
-<<<<<<< HEAD
       - name: WhatsApp email approval regression tests
         run: |
           pnpm exec jest --config backend/plugins/frontline_api/jest.config.ts --runInBand --runTestsByPath backend/plugins/frontline_api/src/modules/integrations/openwa/__tests__/emailApproval.spec.ts backend/plugins/frontline_api/src/modules/integrations/openwa/__tests__/aiReplyRoutes.spec.ts backend/plugins/frontline_api/src/modules/integrations/mail/utils/__tests__/approvalSnapshot.test.ts backend/plugins/frontline_api/src/modules/inbox/meta/automation/openwaRecipient.spec.ts
-=======
       - name: Team member invitation delivery regression tests
         run: pnpm exec jest --config backend/core-api/src/modules/organization/team-member/jest.config.cjs --runInBand
->>>>>>> origin/main
       - name: Router and AI failover regression tests
         run: pnpm exec tsx --test backend/gateway/src/apollo-router/__tests__/windows-router.spec.ts backend/services/automations/src/ai/bridge/__tests__/racoFallback.spec.ts
       - name: Record existing project lint debt

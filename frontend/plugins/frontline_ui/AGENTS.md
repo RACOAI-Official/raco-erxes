@@ -88,6 +88,14 @@
 
 ## Current Capabilities
 
+- Knowledge base topic creation reads and writes `createTopic` as a Boolean
+  through `useQueryState`; the header, empty state and navigation URL open the
+  same sidebar-owned drawer and consume the flag without losing other filters.
+  Defer consuming it while topics load or while the index will redirect to an
+  existing topic; the destination sidebar owns the opened drawer.
+- Jest resolves both plugin aliases (`@/` for modules and `~/` for source);
+  run GraphQL codegen before suites that import the generated `~/gql` client.
+
 - Email drafts show a recipient/subject confirmation before approval sends them.
   Manual email composition/replies also confirm through `useMailSendMail`.
   Compose-mode draft automation settings retain inbox/contact/recipient bindings.
@@ -1010,6 +1018,10 @@ to, bouncedRecipients, retryable, canRetry }` for its delivery state;
   state and deliberately not persisted.
 
 ## Local Invariants
+
+- Internal-note sends derive mentioned recipient IDs from the submitted editor
+  blocks. Restored drafts must notify their actual mentions, and deleted mentions
+  must not leave stale recipients in a cached composer state.
 
 - The OpenWA composer retains its request ID when retrying a failed send and
   resets it after confirmed success. Its mutation and the automation action use

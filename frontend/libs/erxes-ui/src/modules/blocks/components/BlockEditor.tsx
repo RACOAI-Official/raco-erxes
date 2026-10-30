@@ -10,9 +10,8 @@ import { BlockNoteView } from '@blocknote/shadcn';
 
 import { Button, Tooltip } from 'erxes-ui/components';
 import { cn } from 'erxes-ui/lib';
-import { themeState } from 'erxes-ui/state';
+import { useResolvedTheme } from '../../../hooks/use-resolved-theme';
 import { IconPhoto } from '@tabler/icons-react';
-import { useAtomValue } from 'jotai';
 import { KeyboardEvent, useState } from 'react';
 import { BlockEditorProps } from '../types';
 import { SlashMenu } from './SlashMenu';
@@ -47,7 +46,7 @@ export const BlockEditor = ({
   slashMenuOnTop = false,
   additionalSlashMenuItems,
 }: BlockEditorProps) => {
-  const theme = useAtomValue(themeState);
+  const theme = useResolvedTheme();
   const [focus, setFocus] = useState(false);
   const getSlashMenuItems = (query: string) => {
     const items = getDefaultReactSlashMenuItems(editor);
@@ -140,7 +139,7 @@ export const BlockEditor = ({
       )}
     >
       <BlockNoteView
-        theme={theme as 'light' | 'dark'}
+        theme={theme}
         editor={editor}
         slashMenu={false}
         sideMenu={sideMenu}

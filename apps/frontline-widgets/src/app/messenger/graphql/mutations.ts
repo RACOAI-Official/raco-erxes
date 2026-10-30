@@ -23,6 +23,7 @@ mutation WidgetsInsertMessage(
     payload: $payload
   ) {
     ${MESSAGE_FIELDS}
+    widgetSurveyToken
   }
 }
 `;

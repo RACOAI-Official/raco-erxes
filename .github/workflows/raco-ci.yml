@@ -44,6 +44,12 @@ jobs:
         run: |
           pnpm nx test erxes-api-shared --runInBand
           pnpm nx test core-ui --runInBand
+      - name: Native Messenger survey regression tests
+        run: |
+          pnpm exec jest --config backend/plugins/frontline_api/jest.config.ts --runInBand --runTestsByPath backend/plugins/frontline_api/src/modules/survey/widgetVoting.spec.ts
+          pnpm exec jest --config apps/frontline-widgets/jest.config.cjs --runInBand
+      - name: Build Messenger widgets
+        run: pnpm nx build frontline-widgets
       - name: Router and AI failover regression tests
         run: pnpm exec tsx --test backend/gateway/src/apollo-router/__tests__/windows-router.spec.ts backend/services/automations/src/ai/bridge/__tests__/racoFallback.spec.ts
       - name: Record existing project lint debt

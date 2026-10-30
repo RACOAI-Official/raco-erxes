@@ -67,7 +67,19 @@ export const useConversationDetail = (
           (msg) => msg._id === newMessage._id,
         );
 
-        if (messageExists) return prev;
+        if (messageExists)
+          return {
+            ...prev,
+            widgetsConversationDetail: {
+              ...prev.widgetsConversationDetail,
+              messages: prev.widgetsConversationDetail.messages.map(
+                (message) =>
+                  message._id === newMessage._id
+                    ? { ...message, ...newMessage }
+                    : message,
+              ),
+            },
+          };
 
         return {
           widgetsConversationDetail: {

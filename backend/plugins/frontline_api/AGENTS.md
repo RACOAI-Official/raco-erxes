@@ -1361,6 +1361,9 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
 
 ## Local Invariants
 
+- WhatsApp actions with an explicit recipient binding may notify a selected approval contact from mail/customer triggers. A configured binding that resolves empty or remains a placeholder must fail closed, never fall back to the triggering customer. Reply-mode actions still verify the configured WhatsApp conversation. Approval notifications only link to the authenticated CRM draft review; they never authorize email delivery.
+
+
 - Staff conversation detail/converted-item reads and state/assignment mutations
   use `authorizeConversationAction`: check the module action and visibility of
   every conversation before any read result, write, notification, or provider call.

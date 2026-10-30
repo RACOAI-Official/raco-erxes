@@ -1,3 +1,4 @@
+import { resolveOpenwaAutomationRecipient } from './openwaRecipient';
 import { toAiMemoryScopes } from './aiMemoryScopes';
 import { composeOpenwaMessage } from '@/integrations/openwa/outbound';
 import { getOpenwaConfig, openwaId } from '@/integrations/openwa/contract';
@@ -518,14 +519,17 @@ export const inboxAutomationWorkers = {
           values: (action.config || {}) as Record<string, unknown>, defaultValue: '' });
         const target = execution.target || {};
         const config = getOpenwaConfig();
-        const conversation = typeof target.conversationId === 'string'
-          ? await models.Conversations.findOne({ _id: target.conversationId, integrationId: config.integrationId })
-          : null;
-        const customerId = typeof values.customerId === 'string' && values.customerId.trim()
-          ? values.customerId.trim() : conversation?.customerId || target.customerId || target._id;
-        if (typeof customerId !== 'string' || typeof values.text !== 'string')
-          throw new Error('Choose a CRM contact and enter WhatsApp message text');
-        if (target.conversationId && !conversation) throw new Error('Trigger is not a conversation in the configured WhatsApp inbox');
+        const customerId = await resolveOpenwaAutomationRecipient({
+          configuredRecipient: action.config?.customerId,
+          resolvedRecipient: values.customerId,
+          conversationId: target.conversationId,
+          customerId: target.customerId,
+          targetId: target._id,
+          findConversation: (id) => models.Conversations.findOne({
+            _id: id, integrationId: config.integrationId,
+          }),
+        });
+        if (typeof values.text !== 'string') throw new Error('Enter WhatsApp message text');
         const message = await composeOpenwaMessage(subdomain, {
           customerId, text: values.text, requestId: openwaId(String(execution._id), action.id),
         }, { fromBot: true });

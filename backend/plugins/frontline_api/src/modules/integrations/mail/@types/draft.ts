@@ -23,6 +23,16 @@ export interface IMailDraftDocument extends IMailDraft, Document {
   _id: string;
 }
 
+export type IMailDraftApprovalSnapshot = Pick<
+  IMailDraft,
+  | 'to'
+  | 'subject'
+  | 'body'
+  | 'inboxIntegrationId'
+  | 'inboxConversationId'
+  | 'updatedAt'
+>;
+
 export interface IMailDraftChangedEvent {
   _id: string;
   conversationId: string;

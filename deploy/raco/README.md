@@ -1,5 +1,12 @@
 # Raco AI CI and deployment
 
+The web image includes the Frontline public widgets at `/widgets/`. Build them
+with `REACT_APP_WIDGETS_BASE_PATH=/widgets`; both their router and chunk URLs
+must use that prefix. The runtime environment supplies the same-origin gateway
+and public widgets URL. Live forms use `/widgets/live/:channelId/:formId`;
+these are frontend routes, not gateway API routes. Container smoke checks cover
+the live route, launcher bundle, and missing-chunk 404 behavior.
+
 `Raco CI` runs on pushes to `main` and `codex/**`, pull requests, and manual runs.
 It uses Node 22.23.3, pnpm 9.12.3, and frozen dependency installation. Existing
 backend/frontend suites, router/failover tests, automation-template validation,

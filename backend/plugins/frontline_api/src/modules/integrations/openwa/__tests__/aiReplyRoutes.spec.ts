@@ -3,6 +3,16 @@ import type { Request, Response } from 'express';
 import express from 'express';
 import type { AddressInfo } from 'node:net';
 import { openwaRouter } from '../routes';
+import { generateModels } from '~/connectionResolvers';
+import { receiveOpenwaMessage } from '../service';
+import { processWhatsAppEmailApproval } from '../emailApproval';
+jest.mock('~/connectionResolvers', () => ({ generateModels: jest.fn() }));
+jest.mock('../outbound', () => ({ composeOpenwaMessage: jest.fn() }));
+jest.mock('../emailApproval', () => ({
+  isEmailApprovalCommand: (text: string) =>
+    /^\s*(APPROVE|REJECT)\b/i.test(text),
+  processWhatsAppEmailApproval: jest.fn(),
+}));
 import { getOpenwaConfig } from '../contract';
 import { getOpenwaAiConfig, receiveOpenwaAiReply } from '../aiReply';
 
@@ -25,8 +35,9 @@ type RouteLayer = {
   };
 };
 const layers = (openwaRouter as unknown as { stack: RouteLayer[] }).stack;
-const handler = layers.find((layer) => layer.route?.path === '/ai-reply')?.route
-  ?.stack.at(-1)?.handle;
+const handler = layers
+  .find((layer) => layer.route?.path === '/ai-reply')
+  ?.route?.stack.at(-1)?.handle;
 
 it('throttles webhook floods before authentication or model calls', async () => {
   process.env.OPENWA_AI_ENABLED = 'false';
@@ -93,16 +104,14 @@ const run = async (body = request(), signed = true, tampered = false) => {
 beforeEach(() => {
   jest.resetAllMocks();
   process.env.OPENWA_AI_ENABLED = 'true';
-  jest
-    .mocked(getOpenwaConfig)
-    .mockReturnValue({
-      baseUrl: 'http://openwa:2785',
-      apiKey: 'private',
-      sessionId: 's1',
-      integrationId: 'i1',
-      subdomain: 'tenant-a',
-      secret,
-    });
+  jest.mocked(getOpenwaConfig).mockReturnValue({
+    baseUrl: 'http://openwa:2785',
+    apiKey: 'private',
+    sessionId: 's1',
+    integrationId: 'i1',
+    subdomain: 'tenant-a',
+    secret,
+  });
   jest
     .mocked(receiveOpenwaAiReply)
     .mockResolvedValue({ state: 'sent', messageId: 'm1' });
@@ -150,4 +159,37 @@ test('does not process unrelated events', async () => {
   const res = await run({ ...request(), event: 'session.ready' });
   expect(res.sendStatus).toHaveBeenCalledWith(204);
   expect(receiveOpenwaAiReply).not.toHaveBeenCalled();
+});
+
+test('signed approval bypasses LLM and automation dispatch', async () => {
+  const body = request();
+  body.data.body = 'APPROVE';
+  jest.mocked(receiveOpenwaMessage).mockResolvedValue('approval-message');
+  jest.mocked(generateModels).mockResolvedValue({
+    Conversations: { findOne: jest.fn().mockResolvedValue(null) },
+  } as never);
+  jest.mocked(processWhatsAppEmailApproval).mockResolvedValue('approved');
+  const res = await run(body);
+  expect(receiveOpenwaMessage).toHaveBeenCalledWith(body.data, {
+    emitAutomationTrigger: false,
+  });
+  expect(processWhatsAppEmailApproval).toHaveBeenCalledTimes(1);
+  expect(receiveOpenwaAiReply).not.toHaveBeenCalled();
+  expect(getOpenwaAiConfig).not.toHaveBeenCalled();
+  expect(res.json).toHaveBeenCalledWith({
+    accepted: true,
+    messageId: 'approval-message',
+    emailApproval: 'approved',
+  });
+});
+
+test('filtered approval never reaches the email send handler', async () => {
+  const body = request();
+  body.data.body = 'REJECT 0123456789ABCDEF01234567';
+  body.data.fromMe = true;
+  jest.mocked(receiveOpenwaMessage).mockResolvedValue(null);
+  const res = await run(body);
+  expect(processWhatsAppEmailApproval).not.toHaveBeenCalled();
+  expect(receiveOpenwaAiReply).not.toHaveBeenCalled();
+  expect(res.json).toHaveBeenCalledWith({ accepted: true, state: 'ignored' });
 });

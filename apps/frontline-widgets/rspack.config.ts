@@ -1,17 +1,25 @@
 const { composePlugins, withNx, withReact } = require('@nx/rspack');
 const rspack = require('@rspack/core');
 const path = require('path');
+const widgetsBasePath = process.env.REACT_APP_WIDGETS_BASE_PATH || '';
+if (widgetsBasePath && !/^\/[a-z0-9-]+$/.test(widgetsBasePath)) {
+  throw new Error('REACT_APP_WIDGETS_BASE_PATH must be a single absolute path segment');
+}
 
 module.exports = composePlugins(withNx(), withReact(), (config: any) => {
   // Define environment variables
   config.plugins = config.plugins || [];
   config.plugins.push(
     new rspack.DefinePlugin({
+      'process.env.REACT_APP_WIDGETS_BASE_PATH': JSON.stringify(widgetsBasePath),
       'process.env.REACT_APP_API_URL': JSON.stringify(
         process.env.REACT_APP_API_URL || 'http://localhost:4000',
       ),
     }),
   );
+  if (widgetsBasePath) {
+    config.output = { ...config.output, publicPath: `${widgetsBasePath}/` };
+  }
   // Configure dev server to serve static files from dist folder
   config.devServer = config.devServer || {};
   config.devServer.historyApiFallback = true;

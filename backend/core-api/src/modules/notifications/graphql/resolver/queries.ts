@@ -38,6 +38,7 @@ const generateOrderByNotifications = (orderBy?: any) => {
 
 const generateActiveNotificationsFilter =
   (): FilterQuery<INotificationDocument> => ({
+    isArchived: { $ne: true },
     $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }],
   });
 
@@ -181,9 +182,12 @@ export const notificationQueries = {
   async notificationDetail(
     _root: undefined,
     { _id }: { _id: string },
-    { models }: IContext,
+    { models, user }: IContext,
   ) {
-    const notification = await models.Notifications.findOne({ _id });
+    const notification = await models.Notifications.findOne({
+      _id,
+      userId: user._id,
+    });
     if (!notification) {
       throw new Error('Not found notification');
     }

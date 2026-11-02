@@ -1,5 +1,20 @@
 import { withFilter } from 'graphql-subscriptions';
 
+type NotificationSubscriptionContext = {
+  subdomain: string;
+  user?: { _id: string };
+};
+
+const notificationRecipient = (
+  userId: string | undefined,
+  { user }: NotificationSubscriptionContext,
+) => {
+  if (!user?._id || (userId && userId !== user._id)) {
+    throw new Error('Not authorized for this notification recipient');
+  }
+  return user._id;
+};
+
 export default {
   name: 'core',
   typeDefs: `
@@ -35,19 +50,41 @@ export default {
             `,
           });
         },
-        subscribe: (_, { userId }, { subdomain }) =>
-          graphqlPubsub.asyncIterator(
-            `notificationInserted:${subdomain}:${userId}`,
-          ),
+        subscribe: (
+          _: unknown,
+          { userId }: { userId?: string },
+          context: NotificationSubscriptionContext,
+        ) => {
+          const recipient = notificationRecipient(userId, context);
+          return graphqlPubsub.asyncIterator(
+            `notificationInserted:${context.subdomain}:${recipient}`,
+          );
+        },
       },
 
       notificationRead: {
-        subscribe: (_, { userId }) =>
-          graphqlPubsub.asyncIterator(`notificationRead:${userId}`),
+        subscribe: (
+          _: unknown,
+          { userId }: { userId?: string },
+          context: NotificationSubscriptionContext,
+        ) => {
+          const recipient = notificationRecipient(userId, context);
+          return graphqlPubsub.asyncIterator(
+            `notificationRead:${context.subdomain}:${recipient}`,
+          );
+        },
       },
       notificationArchived: {
-        subscribe: (_, { userId }) =>
-          graphqlPubsub.asyncIterator(`notificationArchived:${userId}`),
+        subscribe: (
+          _: unknown,
+          { userId }: { userId?: string },
+          context: NotificationSubscriptionContext,
+        ) => {
+          const recipient = notificationRecipient(userId, context);
+          return graphqlPubsub.asyncIterator(
+            `notificationArchived:${context.subdomain}:${recipient}`,
+          );
+        },
       },
       activityLogInserted: {
         resolve: (payload) => {

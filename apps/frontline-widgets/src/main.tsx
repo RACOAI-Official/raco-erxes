@@ -16,7 +16,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <ApolloProvider client={apolloClient}>
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.REACT_APP_WIDGETS_BASE_PATH || undefined}>
       <AppRoutes />
       <Toaster />
     </BrowserRouter>

@@ -37,5 +37,6 @@ export const sendInvitationEmail = async (
       userId,
     },
     models,
+    { requireDelivery: true },
   );
 };

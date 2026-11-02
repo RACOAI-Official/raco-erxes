@@ -49,6 +49,20 @@ export const useInsertMessage = () => {
         customerId: customerId || undefined,
         ...options?.variables,
       },
+      onCompleted: (data) => {
+        const message = data?.widgetsInsertMessage;
+        if (message?.widgetSurveyToken && message.conversationId) {
+          try {
+            localStorage.setItem(
+              `widget-survey:${message.conversationId}`,
+              message.widgetSurveyToken,
+            );
+          } catch {
+            /* Storage unavailable: voting stays disabled. */
+          }
+        }
+        options?.onCompleted?.(data);
+      },
       onError: (error) => {
         stopBotTyping();
         options?.onError?.(error);

@@ -1,4 +1,8 @@
 import {
+  portalTicketAuthor,
+  requirePortalTicket,
+} from '@/ticket/utils/portalAccess';
+import {
   ICpTicketPipelineFilter,
   ITicketPipelineDocument,
 } from '@/ticket/@types/pipeline';
@@ -18,10 +22,14 @@ export const cpTicketQueries = {
   cpGetTickets: async (
     _root: undefined,
     args: { filter?: (Partial<ITicketFilter> & IOffsetPaginateParams) | null },
-    { models, user, subdomain }: IContext,
+    context: IContext,
   ) => {
-    const filter: Partial<ITicketFilter> & IOffsetPaginateParams =
-      args.filter ?? {};
+    const { models, user, subdomain } = context;
+    const author = portalTicketAuthor(context);
+    const filter: Partial<ITicketFilter> & IOffsetPaginateParams = {
+      ...args.filter,
+      createdBy: author.slice(3),
+    };
     const { page, perPage, createdBy } = filter;
 
     const query = await generateFilter(
@@ -42,17 +50,21 @@ export const cpTicketQueries = {
   cpGetTicket: async (
     _root: undefined,
     { _id }: { _id: string },
-    { models }: IContext,
+    context: IContext,
   ) => {
-    return models.Ticket.getTicket(_id);
+    return requirePortalTicket(context, _id);
   },
   cpGetTicketTotalCount: async (
     _root: undefined,
     args: { filter?: (Partial<ITicketFilter> & IOffsetPaginateParams) | null },
-    { models, user, subdomain }: IContext,
+    context: IContext,
   ) => {
-    const filter: Partial<ITicketFilter> & IOffsetPaginateParams =
-      args.filter ?? {};
+    const { models, user, subdomain } = context;
+    const author = portalTicketAuthor(context);
+    const filter: Partial<ITicketFilter> & IOffsetPaginateParams = {
+      ...args.filter,
+      createdBy: author.slice(3),
+    };
     const { createdBy } = filter;
 
     const query = await generateFilter(
@@ -110,9 +122,10 @@ export const cpTicketQueries = {
   cpTicketGetNotes: async (
     _parent: undefined,
     { ticketId }: { ticketId: string },
-    { models }: IContext,
+    context: IContext,
   ) => {
-    return models.Note.find({
+    await requirePortalTicket(context, ticketId);
+    return context.models.Note.find({
       contentId: ticketId,
       isInternal: { $ne: true },
     })

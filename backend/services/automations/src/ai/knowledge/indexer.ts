@@ -1,4 +1,4 @@
-import { readFileFromStorage } from 'erxes-api-shared/utils';
+import { readAiContextFile } from '../aiAgent/readContextFile';
 import type { IModels } from '../../connectionResolver';
 import type { TAiAgentFile } from '../aiAgent';
 import { buildAiKnowledgeChunks } from './chunk';
@@ -89,7 +89,7 @@ export const indexAiAgentKnowledgeFile = async ({
   });
 
   try {
-    const buffer = await readFileFromStorage({
+    const buffer = await readAiContextFile({
       subdomain,
       key: file.key,
     });

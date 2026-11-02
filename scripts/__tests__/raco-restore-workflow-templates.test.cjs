@@ -51,14 +51,14 @@ test('template importer is dry-run by default, idempotent on apply and never act
     assert.equal(writes, 0);
     const applied = await run(process.execPath, [...base, '--apply']);
     assert(applied.stdout.includes('automation IDs/statuses unchanged'));
-    assert.equal(writes, 9);
+    assert.equal(writes, 11);
     await run(process.execPath, [...base, '--apply']);
-    assert.equal(writes, 9, 'Rerun must preserve existing templates without duplicates');
+    assert.equal(writes, 11, 'Rerun must preserve existing templates without duplicates');
     assert(!operations.some(q => /automations(Add|Edit)|mailDraftApprove|frontlineOpenwaCompose/.test(q)));
     owner = false;
     await assert.rejects(run(process.execPath, [...base, '--apply']));
-    assert.equal(writes, 9, 'Non-owner must not write templates');
-    console.log('Verified dry-run, nine draft-safe templates, idempotent rerun, owner requirement and unchanged automation status.');
+    assert.equal(writes, 11, 'Non-owner must not write templates');
+    console.log('Verified dry-run, eleven draft-safe templates, idempotent rerun, owner requirement and unchanged automation status.');
   } finally {
     await new Promise(resolve => server.close(resolve));
     fs.unlinkSync(credentials);

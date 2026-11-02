@@ -10,6 +10,7 @@ import { sendTRPCMessage } from '../trpc';
 import { getEnv, isImage, isVideo } from '../utils';
 import { sanitizeFilename } from '../sanitize';
 import { randomAlphanumeric } from '../random';
+import { uploadLocalFile } from './localUpload';
 
 const STORAGE_CONFIG_CODES = [
   'UPLOAD_SERVICE_TYPE',
@@ -520,9 +521,7 @@ export const uploadFileToStorage = async ({
   }
 
   if (uploadType === 'LOCAL') {
-    throw new Error(
-      'Local storage cannot be accessed from shared utilities. Use server-side file upload instead.',
-    );
+    return uploadLocalFile({ subdomain, filePath, fileName });
   }
 
   throw new Error(

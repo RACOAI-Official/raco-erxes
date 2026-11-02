@@ -53,6 +53,7 @@ export interface IMessage {
   customerId?: string;
   content: string;
   contentType?: string;
+  extraData?: { survey?: IWidgetSurvey };
   dailyStatus?: string;
   createdAt: Date;
   internal?: boolean;
@@ -88,4 +89,22 @@ export interface ISupporter {
   isActive: boolean;
   isOnline: boolean;
   details: IDetail;
+}
+
+export interface IWidgetSurvey {
+  surveyId: string;
+  question: string;
+  answers: { id: string; text: string }[];
+  allowMultiselect?: boolean;
+  steps?: {
+    stepId: string;
+    question: string;
+    answers: { id: string; text: string }[];
+    allowMultiselect?: boolean;
+  }[];
+  expiry?: string;
+  results?: {
+    isFinalized?: boolean;
+    answerCounts?: { id: string; count: number }[];
+  };
 }

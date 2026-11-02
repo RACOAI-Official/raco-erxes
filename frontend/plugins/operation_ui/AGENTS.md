@@ -20,6 +20,9 @@
 
 ## Current Capabilities
 
+- Team settings use `/operation/settings/team` in module metadata and routes;
+  the previously advertised `/operation/settings/teams` URL redirects there.
+
 - Task date filters use the shared date picker for due, start, creation, update, and completion ranges. Task lists and statistics parse the same URL ranges into paired API bounds, and date-filtered lists refetch on task subscription events.
 
 - The automations widget answers built-in template prerequisites: the

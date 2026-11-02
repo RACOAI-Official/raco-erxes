@@ -11,6 +11,7 @@ import { useOpenwaTranslation } from './translations';
 
 const schema = z.object({
   customerId: z.string().optional(),
+  approvalDraftId: z.string().optional(),
   text: z.string().trim().min(1).max(4096),
 });
 type OpenwaActionConfig = z.infer<typeof schema>;
@@ -46,6 +47,20 @@ export const OpenwaActionForm = ({
                 <Input {...field} placeholder="{{ input.customerId }}" />
               </Form.Control>
               <Form.Description>{t('recipientHelp')}</Form.Description>
+              <Form.Message />
+            </Form.Item>
+          )}
+        />
+        <Form.Field
+          control={form.control}
+          name="approvalDraftId"
+          render={({ field }) => (
+            <Form.Item>
+              <Form.Label>{t('approvalDraft')}</Form.Label>
+              <Form.Control>
+                <Input {...field} value={field.value || ''} />
+              </Form.Control>
+              <Form.Description>{t('approvalHelp')}</Form.Description>
               <Form.Message />
             </Form.Item>
           )}

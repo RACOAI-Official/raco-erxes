@@ -79,7 +79,7 @@ export const KnowledgeBaseSidebar = () => {
   const { topicId } = useKnowledgeBaseRoute();
   const { setOpen: openCurrentTopic } = useTopicOpenState(topicId);
   const { topics, loading, error } = useTopics();
-  const [createTopic, setCreateTopic] = useQueryState<string>('createTopic');
+  const [createTopic, setCreateTopic] = useQueryState<boolean>('createTopic');
   const [isTopicCreateOpen, setIsTopicCreateOpen] = useState(false);
   const [categoryDraft, setCategoryDraft] = useState<TCategoryDraft>();
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
@@ -97,11 +97,13 @@ export const KnowledgeBaseSidebar = () => {
   }, [openCurrentTopic]);
 
   useEffect(() => {
-    if (createTopic !== 'true') return;
+    // The index redirects once topics load. Preserve the request until the
+    // destination sidebar mounts, otherwise its drawer state is discarded.
+    if (createTopic !== true || loading || (!topicId && topics?.length)) return;
 
     setIsTopicCreateOpen(true);
     setCreateTopic(null);
-  }, [createTopic, setCreateTopic]);
+  }, [createTopic, setCreateTopic, loading, topicId, topics?.length]);
 
   return (
     <Sidebar.Panel

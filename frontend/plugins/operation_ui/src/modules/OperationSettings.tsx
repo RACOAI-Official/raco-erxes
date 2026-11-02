@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { IconUserSquare } from '@tabler/icons-react';
 import { Button, PageContainer } from 'erxes-ui';
 import { Suspense } from 'react';
-import { Outlet, Route, Routes } from 'react-router';
+import { Navigate, Outlet, Route, Routes } from 'react-router';
 import { SettingsHeader } from 'ui-modules';
 import { TeamDetailPage } from '~/pages/TeamDetailPage';
 import { TeamMembersPage } from '~/pages/TeamMembersPage';
@@ -20,6 +20,10 @@ const OperationSettings = () => {
   return (
     <Suspense fallback={<div />}>
       <Routes>
+        <Route
+          path="/teams"
+          element={<Navigate to="/operation/settings/team" replace />}
+        />
         <Route
           path="/team"
           element={

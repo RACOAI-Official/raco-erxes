@@ -1,3 +1,8 @@
+import {
+  createWidgetSurveyToken,
+  submitWidgetSurveyVote,
+  WidgetSurveyInput,
+} from '@/survey/widgetVoting';
 import crypto from 'crypto';
 import {
   IAttachment,
@@ -326,6 +331,15 @@ const buildTicketPropertiesData = async (
 };
 
 export const widgetMutations: Record<string, Resolver> = {
+  async widgetsSurveyVote(
+    _root: unknown,
+    args: WidgetSurveyInput & { optionIds: string[] },
+    { models, subdomain }: IContext,
+  ) {
+    return submitWidgetSurveyVote(models, subdomain, args);
+  },
+
+
   async widgetsLeadIncreaseViewCount(
     _root,
     { formId }: { formId: string },
@@ -960,6 +974,14 @@ console.log(JSON.stringify({customer}))
       });
     }
 
+    if (!conversationId) {
+      const widgetSurveyToken = await createWidgetSurveyToken(
+        subdomain,
+        integrationId,
+        String(conversation._id),
+      );
+      return { ...msg.toObject(), widgetSurveyToken };
+    }
     return msg;
   },
 

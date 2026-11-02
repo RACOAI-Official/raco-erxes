@@ -1,4 +1,8 @@
 import {
+  getWidgetSurveySelection,
+  WidgetSurveyInput,
+} from '@/survey/widgetVoting';
+import {
   isEnabled,
   markResolvers,
   sendTRPCMessage,
@@ -73,6 +77,13 @@ const getWidgetMessages = (models: IModels, conversationId: string) => {
 };
 
 export const widgetQueries: Record<string, Resolver> = {
+  async widgetsSurveySelection(
+    _root: unknown,
+    args: WidgetSurveyInput,
+    { models, subdomain }: IContext,
+  ) {
+    return getWidgetSurveySelection(models, subdomain, args);
+  },
   async widgetsConversations(
     _root,
     args: { integrationId: string; customerId?: string; visitorId?: string },

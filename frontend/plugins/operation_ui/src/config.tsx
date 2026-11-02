@@ -47,7 +47,7 @@ export const CONFIG: IUIConfig = {
     {
       name: 'teams',
       icon: IconListCheck,
-      path: 'operation/settings/teams',
+      path: 'operation/settings/team',
     },
     {
       name: 'github-integration',

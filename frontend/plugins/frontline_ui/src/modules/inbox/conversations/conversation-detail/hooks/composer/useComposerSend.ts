@@ -3,6 +3,7 @@ import { readFacebookDelivery } from '@/integrations/facebook/types/FacebookRepl
 import { getInstagramSendError } from '@/integrations/instagram/utils/instagramSendError';
 import {
   getBlockAttachments,
+  getMentionedUserIds,
   toast,
   useBlockEditor,
   type IAttachment,
@@ -107,7 +108,11 @@ export const useComposerSend = ({
           conversationId: submittedConversationId,
           content: `${quotedContent}${sendContent || ''}`,
           mentionedUserIds:
-            isDiscord && !isInternalNote ? [] : mentionedUserIds,
+            isInternalNote
+              ? getMentionedUserIds(content)
+              : isDiscord
+                ? []
+                : mentionedUserIds,
           internal: isInternalNote,
           extraInfo: messageExtraInfo,
           attachments: allAttachments,

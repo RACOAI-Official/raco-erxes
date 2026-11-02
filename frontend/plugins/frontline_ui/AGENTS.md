@@ -88,6 +88,14 @@
 
 ## Current Capabilities
 
+- Knowledge base topic creation reads and writes `createTopic` as a Boolean
+  through `useQueryState`; the header, empty state and navigation URL open the
+  same sidebar-owned drawer and consume the flag without losing other filters.
+  Defer consuming it while topics load or while the index will redirect to an
+  existing topic; the destination sidebar owns the opened drawer.
+- Jest resolves both plugin aliases (`@/` for modules and `~/` for source);
+  run GraphQL codegen before suites that import the generated `~/gql` client.
+
 - Email drafts show a recipient/subject confirmation before approval sends them.
   Manual email composition/replies also confirm through `useMailSendMail`.
   Compose-mode draft automation settings retain inbox/contact/recipient bindings.
@@ -1010,6 +1018,10 @@ to, bouncedRecipients, retryable, canRetry }` for its delivery state;
   state and deliberately not persisted.
 
 ## Local Invariants
+
+- Internal-note sends derive mentioned recipient IDs from the submitted editor
+  blocks. Restored drafts must notify their actual mentions, and deleted mentions
+  must not leave stale recipients in a cached composer state.
 
 - The OpenWA composer retains its request ID when retrying a failed send and
   resets it after confirmed success. Its mutation and the automation action use
@@ -2694,3 +2706,5 @@ null }`, fall back to the route pipeline and skip without one; never pass
 - **Affected areas:** `src/modules/integrations/telegram`, inbox provider metadata, composer hooks, message actions and integration menus.
 - # **Contracts changed:** Adds the Telegram integration kind and optional message metadata; consumes the existing canonical reply mutation with Telegram provider IDs.
   > > > > > > > b5737b8f9a6f3d229cf63081569bfebc7196a29c
+
+- WhatsApp email approvals accept bare APPROVE/REJECT. Match a quoted preview by its authenticated provider message ID; an unquoted command requires exactly one ready pending request. Unknown quotes and multiple requests must never select a fallback draft. Persist inbound command-to-request bindings so redelivery cannot approve a later email. Internal references are never required in the user reply.

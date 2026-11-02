@@ -150,6 +150,7 @@ test('stores intake without the automation queue and sends once with a stable re
       requestId: expect.stringMatching(/^openwa-/),
     },
     { fromBot: true },
+    { chatId: message().chatId, conversationId: expect.stringMatching(/^openwa-/) },
   );
 });
 

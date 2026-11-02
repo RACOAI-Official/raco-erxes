@@ -17,6 +17,7 @@ export interface INotificationDocument extends Document {
 
   // Status
   isRead: boolean;
+  isArchived: boolean;
   readAt?: Date;
 
   // Additional data
@@ -78,6 +79,11 @@ export const notificationSchema = new Schema(
 
     readAt: {
       type: Date,
+    },
+
+    isArchived: {
+      type: Boolean,
+      default: false,
     },
 
     priority: {

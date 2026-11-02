@@ -19,6 +19,7 @@ export const sendEmail = async (
   subdomain: string,
   params: IEmailParams,
   models?: IModels,
+  options: { requireDelivery?: boolean } = {},
 ) => {
   const {
     toEmails = [],
@@ -146,14 +147,23 @@ export const sendEmail = async (
         },
       });
 
-      console.log(
-        outcome.skipped
-          ? `Email skipped, address is suppressed: ${toEmail}`
-          : `Email sent successfully: ${toEmail} from ${from}`,
-      );
-    } catch (e) {
-      console.log(`Error sending email to ${toEmail}: ${e.name}: ${e.message}`);
-      console.log(e.stack);
+      if (
+        options.requireDelivery &&
+        (outcome.skipped ||
+          !outcome.accepted.some(
+            (address) => address.toLowerCase() === toEmail.toLowerCase(),
+          ))
+      ) {
+        throw new Error('The recipient was not accepted for delivery');
+      }
+    } catch {
+      if (options.requireDelivery) {
+        throw new Error(
+          'Invitation email could not be delivered. Check transactional email settings, then use Resend invitation for the pending member.',
+        );
+      }
+      // Other transactional callers retain their existing best-effort behavior.
+      console.error('Transactional email delivery failed');
     }
   }
 };

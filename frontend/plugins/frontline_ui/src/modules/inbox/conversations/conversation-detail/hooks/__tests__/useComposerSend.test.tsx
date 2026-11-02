@@ -18,6 +18,7 @@ type MutationOptions = NonNullable<
   >[0]
 >;
 const mockAddMessage = jest.fn();
+const mockGetMentionedUserIds = jest.fn((_content: unknown): string[] => []);
 
 jest.mock('../useConversationMessageAdd', () => ({
   useConversationMessageAdd: () => ({
@@ -27,6 +28,7 @@ jest.mock('../useConversationMessageAdd', () => ({
 }));
 jest.mock('erxes-ui', () => ({
   getBlockAttachments: () => [],
+  getMentionedUserIds: (content: unknown) => mockGetMentionedUserIds(content),
   toast: jest.fn(),
 }));
 jest.mock('react-i18next', () => ({
@@ -77,6 +79,7 @@ const setup = (overrides: Partial<Options> = {}) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockGetMentionedUserIds.mockReturnValue([]);
   sessionStorage.clear();
   mockAddMessage.mockImplementation((options: MutationOptions) => {
     const data = {
@@ -145,6 +148,30 @@ test('internal notes never send a provider reply ID and retain all editor blocks
       JSON.stringify({ blocks: multiBlock, internal: true }),
     ),
   ).toEqual({ blocks: multiBlock, internal: true });
+});
+
+test('restored internal notes derive notification recipients from saved blocks', async () => {
+  const restored = parseConversationDraft(JSON.stringify({
+    blocks: [{ ...textBlock, content: [
+      { type: 'mention', props: { _id: 'support', fullName: 'Support Agent' } },
+    ] }],
+    internal: true,
+  }));
+  mockGetMentionedUserIds.mockReturnValue(['support']);
+  const { result } = setup({
+    isInternalNote: true,
+    content: restored.blocks,
+    mentionedUserIds: [],
+  });
+  await act(() => result.current.handleSubmit());
+  expect(mockGetMentionedUserIds).toHaveBeenCalledWith(restored.blocks);
+  expect(mockAddMessage.mock.calls[0][0].variables.mentionedUserIds).toEqual(['support']);
+});
+
+test('removed internal-note mentions do not notify stale recipients', async () => {
+  const { result } = setup({ isInternalNote: true, mentionedUserIds: ['removed'] });
+  await act(() => result.current.handleSubmit());
+  expect(mockAddMessage.mock.calls[0][0].variables.mentionedUserIds).toEqual([]);
 });
 
 test('Facebook partial delivery retains only unsent attachments for retry', async () => {

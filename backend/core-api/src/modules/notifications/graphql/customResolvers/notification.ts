@@ -2,8 +2,9 @@ import { INotificationDocument } from 'erxes-api-shared/core-modules';
 import { IContext } from '~/connectionResolvers';
 
 export default {
-  __resolveReference({ _id }: INotificationDocument, { models }: IContext) {
-    return models.Notifications.findOne({ _id });
+  __resolveReference({ _id }: INotificationDocument, { models, user }: IContext) {
+    if (!user?._id) return null;
+    return models.Notifications.findOne({ _id, userId: user._id });
   },
   async fromUser(
     { fromUserId }: INotificationDocument,

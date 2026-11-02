@@ -1361,18 +1361,10 @@ customerIds, tagIds, propertiesData: JSON)` — the public messenger ticket
 
 ## Local Invariants
 
-- Email approval through WhatsApp uses explicit draft/contact bindings, an internal tenant/integration/phone-bound 24-hour reference and an immutable email snapshot. Only exact APPROVE/REJECT commands bypass AI handling. Never let an LLM decide approval, let edited drafts reuse old approvals, or retry uncertain email delivery automatically. The contact phone remains editable; changing it invalidates pending requests.
-
-
-- WhatsApp actions with an explicit recipient binding may notify a selected approval contact from mail/customer triggers. A configured binding that resolves empty or remains a placeholder must fail closed, never fall back to the triggering customer. Reply-mode actions still verify the configured WhatsApp conversation. Approval notifications only link to the authenticated CRM draft review; they never authorize email delivery.
-
-
 - Staff conversation detail/converted-item reads and state/assignment mutations
   use `authorizeConversationAction`: check the module action and visibility of
   every conversation before any read result, write, notification, or provider call.
   A mixed bulk selection fails as a whole; personal inboxes remain private.
-- Client-portal ticket data and notes require a signed-in portal user whose portal matches the app token. Derive ticket authors from the session; never trust a caller-supplied createdBy filter. Enforce ownership before ticket reads, updates, or notes, including count queries.
-
 
 - Outgoing OpenWA requests use a stable request ID as the provider's
   `Idempotency-Key` and as the CRM message ID seed. A retry must retain that ID;

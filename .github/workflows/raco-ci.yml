@@ -53,6 +53,8 @@ jobs:
       - name: WhatsApp email approval regression tests
         run: |
           pnpm exec jest --config backend/plugins/frontline_api/jest.config.ts --runInBand --runTestsByPath backend/plugins/frontline_api/src/modules/integrations/openwa/__tests__/emailApproval.spec.ts backend/plugins/frontline_api/src/modules/integrations/openwa/__tests__/aiReplyRoutes.spec.ts backend/plugins/frontline_api/src/modules/integrations/mail/utils/__tests__/approvalSnapshot.test.ts backend/plugins/frontline_api/src/modules/inbox/meta/automation/openwaRecipient.spec.ts
+      - name: App query permission regression tests
+        run: pnpm exec jest --config backend/core-api/src/modules/apps/jest.config.cjs --runInBand
       - name: Team member invitation delivery regression tests
         run: pnpm exec jest --config backend/core-api/src/modules/organization/team-member/jest.config.cjs --runInBand
       - name: Router and AI failover regression tests

@@ -1,12 +1,15 @@
-import { IContext } from '~/connectionResolvers';
+import type { IContext } from '~/connectionResolvers';
+
+type AppSearchParams = { searchValue?: string; page?: number; perPage?: number };
 
 export const appQueries = {
   async apps(
     _parent: undefined,
-    { searchValue, page = 1, perPage = 20 }: any,
-    { models }: IContext,
+    { searchValue, page = 1, perPage = 20 }: AppSearchParams,
+    { models, checkPermission }: IContext,
   ) {
-    const qry: any = {};
+    await checkPermission('appsManage');
+    const qry: { name?: RegExp } = {};
 
     if (searchValue) {
       qry.name = new RegExp(`.*${searchValue}.*`, 'i');
@@ -20,10 +23,11 @@ export const appQueries = {
 
   async appsTotalCount(
     _parent: undefined,
-    { searchValue }: any,
-    { models }: IContext,
+    { searchValue }: Pick<AppSearchParams, 'searchValue'>,
+    { models, checkPermission }: IContext,
   ) {
-    const qry: any = {};
+    await checkPermission('appsManage');
+    const qry: { name?: RegExp } = {};
 
     if (searchValue) {
       qry.name = new RegExp(`.*${searchValue}.*`, 'i');
@@ -35,8 +39,9 @@ export const appQueries = {
   async appDetail(
     _parent: undefined,
     { _id }: { _id: string },
-    { models }: IContext,
+    { models, checkPermission }: IContext,
   ) {
+    await checkPermission('appsManage');
     return models.Apps.findOne({ _id });
   },
 };
